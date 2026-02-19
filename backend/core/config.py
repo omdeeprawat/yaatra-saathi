@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
   FRONTEND_URL : str = 'http://localhost:5173'
   
-  # cloudinary 
+  # cloudinary
   CLOUDINARY_CLOUD_NAME: Optional[str] = None
   CLOUDINARY_API_KEY: Optional[str] = None
   CLOUDINARY_API_SECRET: Optional[str] = None
