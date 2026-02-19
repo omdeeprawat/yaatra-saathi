@@ -18,7 +18,8 @@ class Settings(BaseSettings):
   GOOGLE_REDIRECT_URI : str = 'http://localhost:8000/auth/google/callback' 
 
   FRONTEND_URL : str = 'http://localhost:5173'
-
+  
+  # cloudinary 
   CLOUDINARY_CLOUD_NAME: Optional[str] = None
   CLOUDINARY_API_KEY: Optional[str] = None
   CLOUDINARY_API_SECRET: Optional[str] = None
