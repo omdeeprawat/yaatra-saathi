@@ -1,7 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { User, AuthState, LoginRequest, RegisterRequest } from '@/types';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import type { AuthState, LoginRequest, RegisterRequest } from '@/types';
 import { authApi } from '@/services/api';
 
+// import {User} from '@/types';
 interface AuthContextType extends AuthState {
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
