@@ -1,5 +1,6 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
-import {
+import axios, { AxiosError } from "axios";
+import type { AxiosInstance } from "axios";
+import type {
   TokenResponse,
   LoginRequest,
   RegisterRequest,
@@ -38,7 +39,7 @@ apiClient.interceptors.response.use(
   },
 );
 
-// ── Auth API ──────────────────────────────────────────────────────────────
+// Auth API 
 
 export const authApi = {
   register: async (data: RegisterRequest): Promise<TokenResponse> => {
@@ -61,7 +62,7 @@ export const authApi = {
   },
 };
 
-// ── Posts API ─────────────────────────────────────────────────────────────
+// Posts API
 
 export const postsApi = {
   getPosts: async (page = 1, size = 10): Promise<PaginatedResponse<Post>> => {
@@ -84,7 +85,7 @@ export const postsApi = {
   },
 };
 
-// ── Health API ────────────────────────────────────────────────────────────
+// Health API 
 
 export const healthApi = {
   check: async () => {
@@ -95,7 +96,7 @@ export const healthApi = {
 
 export default apiClient;
 
-// ── Upload API ────────────────────────────────────────────────────────────
+// Upload API 
 
 export interface UploadResponse {
   url: string;
@@ -121,7 +122,7 @@ export const uploadApi = {
   },
 };
 
-// ── Chat API ──────────────────────────────────────────────────────────────
+// Chat API 
 
 export interface ChatHistoryItem {
   role: "user" | "assistant";
@@ -166,7 +167,7 @@ export const chatApi = {
   },
 };
 
-// ── Map API ───────────────────────────────────────────────────────────────
+// Map API
 
 export const mapApi = {
   getStops: async (): Promise<import("@/types").YatraStop[]> => {
