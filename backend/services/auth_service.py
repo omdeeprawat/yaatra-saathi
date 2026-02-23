@@ -36,7 +36,7 @@ def create_user(db : Session, data : RegisterRequest) -> User:
 
 
 def authenticate_user(db : Session, email : str, password : str) -> User:
-  user = get_user_by_email(d, email)
+  user = get_user_by_email(db, email)
 
   if not user:
     raise HTTPException(
