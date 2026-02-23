@@ -23,4 +23,4 @@ class User(Base):
   updated_At = Column(DateTime(timezone = True), onupdate= func.now())
 
   # relationship
-  posts = relationship("Post", back_populates = "author")
+  # posts = relationship("Post", back_populates = "author")
