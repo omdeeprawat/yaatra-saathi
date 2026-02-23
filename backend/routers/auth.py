@@ -12,6 +12,11 @@ from core.security import create_access_token
 from core.dependencies import get_current_user
 from models.user import User
 
+from services.auth_service import (
+  create_user,
+  authenticate_user,
+  get_or_create_oauth_user
+)
 
 router = APIRouter(prefix = "/auth" , tags=["auth"])
 
@@ -32,7 +37,7 @@ oauth.register(
 @router.post("/register", response_model = TokenResponse, status_code = status.HTTP_201_CREATED)
 def register(data : RegisterRequest, db : Session = Depends(get_db)):
   """ registering a new user with email and password"""
-  user = authenticate_user(db, data.email, data.password)
+  user = create_user(db, data)
   token = create_access_token({"sub" : str(user.id)})
   return TokenResponse(access_token =   token, user = UserResponse.model_validate(user))
 
