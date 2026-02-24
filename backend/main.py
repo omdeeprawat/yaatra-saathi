@@ -24,7 +24,12 @@ app.add_middleware(
     allow_headers = ["*"]
 )
 
-app.add_middleware(SessionMiddleware, secret_key = settings.SECRET_KEY)
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key = settings.SECRET_KEY, 
+    same_site="lax", 
+    https_only = False
+)
 
 app.include_router(auth.router)
 
