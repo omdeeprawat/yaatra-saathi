@@ -24,6 +24,7 @@ app.add_middleware(
     allow_headers = ["*"]
 )
 
+app.add_middleware(SessionMiddleware, secret_key = settings.SECRET_KEY)
 
 app.include_router(auth.router)
 
