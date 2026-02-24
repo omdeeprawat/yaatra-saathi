@@ -15,7 +15,7 @@ class Settings(BaseSettings):
   # google oauth
   GOOGLE_CLIENT_ID : Optional[str] = None
   GOOGLE_CLIENT_SECRET : Optional[str] = None
-  GOOGLE_REDIRECT_URI : str = 'http://localhost:8000/auth/google/callback' 
+  GOOGLE_REDIRECT_URI : str = 'http://127.0.0.1:8000/auth/google/callback' 
 
   FRONTEND_URL : str = 'http://localhost:5173'
 
