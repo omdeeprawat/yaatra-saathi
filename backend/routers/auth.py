@@ -96,7 +96,7 @@ async def google_callback(request : Request, db : Session = Depends(get_db)):
     email = userinfo["email"],
     full_name = userinfo.get("name", ""),
     avatar_url=userinfo.get("picture"),
-    procider = AuthProvider.google
+    provider = AuthProvider.google
   )
 
   jwt_token = create_access_token({"sub" : str(user.id)})
