@@ -3,14 +3,13 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request 
-from starlette.config import Config
 
 from core.config import settings
 from schemas.auth import UserResponse, TokenResponse, RegisterRequest, LoginRequest
 from db.database import get_db
 from core.security import create_access_token
 from core.dependencies import get_current_user
-from models.user import User
+from models.user import User, AuthProvider
 
 from services.auth_service import (
   create_user,
@@ -20,15 +19,11 @@ from services.auth_service import (
 
 router = APIRouter(prefix = "/auth" , tags=["auth"])
 
-
-starlette_config = Config(environ={
-  "GOOGLE_CLIENT_ID" : settings.GOOGLE_CLIENT_ID or "",
-  "GOOGLE_CLIENT_SECRET" : settings.GOOGLE_CLIENT_SECRET or ""
-}
-)
-oauth = OAuth(starlette_config)
+oauth = OAuth()
 oauth.register(
   name = "google",
+  client_id = settings.GOOGLE_CLIENT_ID,
+  client_secret = settings.GOOGLE_CLIENT_SECRET,
   server_metadata_url = "https://accounts.google.com/.well-known/openid-configuration",
   client_kwargs = {"scope" : "openid email profile"}
 )
@@ -60,13 +55,18 @@ def get_me(current_user : User = Depends(get_current_user)):
 @router.get("/google")
 async def google_login(request : Request):
   """ Redirecting to the google consent screen """
+  print("GOOGLE_REDIRECT_URI:", settings.GOOGLE_REDIRECT_URI)
   if not settings.GOOGLE_CLIENT_ID:
     raise HTTPException(
       status_code = status.HTTP_501_NOT_IMPLEMENTED,
       detail = "google oauth is not configured"
     )
-    redirect_uri = settings.GOOGLE_REDIRECT_URI
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+  try:
+    response = await oauth.google.authorize_redirect(request, settings.GOOGLE_REDIRECT_URI)
+    return response
+    
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/google/callback")
