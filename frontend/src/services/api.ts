@@ -58,7 +58,7 @@ export const authApi = {
   },
 
   googleLogin: () => {
-    window.location.href = "/api/auth/google";
+    window.location.href = "http://127.0.0.1:8000/auth/google";
   },
 };
 
