@@ -75,7 +75,7 @@ def get_or_create_oauth_user(
   
   """ used by google oauth - find existing user or create a new one """
 
-
+  user = get_user_by_email(db, email)
   if user:
     if avatar_url and user.avatar_url != avatar_url:
       user.avatar_url = avatar_url
@@ -94,6 +94,6 @@ def get_or_create_oauth_user(
   )
   db.add(user)
   db.commit()
-  db.refresh()
+  db.refresh(user)
 
   return user
