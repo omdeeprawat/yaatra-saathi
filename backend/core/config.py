@@ -25,6 +25,9 @@ class Settings(BaseSettings):
 
   OPENAI_API_KEY: Optional[str] = None
 
+  REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+  ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+
   class Config:
     env_file = ".env"
     case_sensitive = True
