@@ -13,6 +13,7 @@ const apiClient: AxiosInstance = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
+  withCredentials : true  // httponly refresh cookie is sent automatically
 });
 
 // Attach JWT token to every request automatically
@@ -28,11 +29,25 @@ apiClient.interceptors.request.use(
 // Global 401 handler
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+  async (error: AxiosError) => {
+    const originalRequest = error.config as any;
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry && 
+      !originalRequest.url?.includes("/auth/refresh")
+    ) {
+      originalRequest._retry = true;
+      try{
+        const res = await apiClient.post<TokenResponse>("/auth/refresh");
+        const newToken = res.data.access_token;
+        localStorage.setItem("access_token", newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch {
+        localStorage.removeItem("access_token");
+        if (!window.location.pathname.includes("/login")) {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);
@@ -50,6 +65,16 @@ export const authApi = {
   login: async (data: LoginRequest): Promise<TokenResponse> => {
     const res = await apiClient.post<TokenResponse>("/auth/login", data);
     return res.data;
+  },
+
+  refresh: async () : Promise<TokenResponse> => {
+    const res = await apiClient.post<TokenResponse>("/auth/refresh");
+    return res.data;
+  },
+
+  logout : async () : Promise<void> => {
+    await apiClient.post("/auth/logout");
+    localStorage.removeItem("access_token");
   },
 
   getMe: async (): Promise<User> => {
