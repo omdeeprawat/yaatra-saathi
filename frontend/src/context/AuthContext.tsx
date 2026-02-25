@@ -7,7 +7,7 @@ import { authApi } from '@/services/api';
 interface AuthContextType extends AuthState {
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   googleLogin: () => void;
   handleOAuthCallback: (token: string) => Promise<void>;
 }
@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   // On mount — if a token exists, verify it and fetch user
+  // if access token is expired try to refresh before giving in
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -31,9 +32,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then((user) => {
           setState({ user, token, isLoading: false, isAuthenticated: true });
         })
-        .catch(() => {
-          localStorage.removeItem('access_token');
-          setState({ user: null, token: null, isLoading: false, isAuthenticated: false });
+        .catch(async () => {
+          // access token may be expired, try refresh
+          try {
+            const response = await authApi.refresh();
+            localStorage.setItem('access_token', response.access_token);
+            setState({ user: response.user, token: response.access_token, isLoading: false, isAuthenticated: true });
+          } catch {
+            //refresh also failed, user needs to login again
+            localStorage.removeItem('access_token');
+            setState({ user: null, token: null, isLoading: false, isAuthenticated: false });
+          }
         });
     } else {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -62,7 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try{ 
+      await authApi.logout();
+    } catch {
+      // even if logout API call fails, we clear local auth state
+    }
     localStorage.removeItem('access_token');
     setState({ user: null, token: null, isLoading: false, isAuthenticated: false });
   };
