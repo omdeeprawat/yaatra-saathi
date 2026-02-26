@@ -13,7 +13,7 @@ const apiClient: AxiosInstance = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
-  withCredentials : true  // httponly refresh cookie is sent automatically
+  withCredentials: true, // httponly refresh cookie is sent automatically
 });
 
 // Attach JWT token to every request automatically
@@ -32,12 +32,12 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
     if (
-      error.response?.status === 401 && 
-      !originalRequest._retry && 
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
       !originalRequest.url?.includes("/auth/refresh")
     ) {
       originalRequest._retry = true;
-      try{
+      try {
         const res = await apiClient.post<TokenResponse>("/auth/refresh");
         const newToken = res.data.access_token;
         localStorage.setItem("access_token", newToken);
@@ -54,7 +54,7 @@ apiClient.interceptors.response.use(
   },
 );
 
-// Auth API 
+// Auth API
 
 export const authApi = {
   register: async (data: RegisterRequest): Promise<TokenResponse> => {
@@ -67,12 +67,12 @@ export const authApi = {
     return res.data;
   },
 
-  refresh: async () : Promise<TokenResponse> => {
+  refresh: async (): Promise<TokenResponse> => {
     const res = await apiClient.post<TokenResponse>("/auth/refresh");
     return res.data;
   },
 
-  logout : async () : Promise<void> => {
+  logout: async (): Promise<void> => {
     await apiClient.post("/auth/logout");
     localStorage.removeItem("access_token");
   },
@@ -109,7 +109,7 @@ export const postsApi = {
   },
 };
 
-// Health API 
+// Health API
 
 export const healthApi = {
   check: async () => {
@@ -120,7 +120,7 @@ export const healthApi = {
 
 export default apiClient;
 
-// Upload API 
+// Upload API
 
 export interface UploadResponse {
   url: string;
@@ -146,7 +146,7 @@ export const uploadApi = {
   },
 };
 
-// Chat API 
+// Chat API
 
 export interface ChatHistoryItem {
   role: "user" | "assistant";
