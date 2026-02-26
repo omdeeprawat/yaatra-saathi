@@ -8,6 +8,7 @@ from alembic import context
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from core.config import settings
 from db.database import Base
 from models.user import User
 from models.post import Post
@@ -64,7 +65,16 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = create_engine(settings.DATABASE_URL)
+    # Override the sqlalchemy.url from alembic.ini with the one from settings
+    configuration = config.get_section(config.config_ini_section, {})
+    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+
+    connectable = engine_from_config(
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata
