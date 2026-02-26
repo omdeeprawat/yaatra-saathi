@@ -145,5 +145,5 @@ async def google_callback(request : Request, db : Session = Depends(get_db)):
 
   # Redirect to frontend with token in URL fragment
   # Frontend reads it from the URL and stores in localStorage
-  frontend_url = f"http://localhost:5173/auth/callback?token={jwt_token}"
+  frontend_url = f"{settings.FRONTEND_URL}/auth/callback?token={jwt_token}"
   return RedirectResponse(url=frontend_url)
