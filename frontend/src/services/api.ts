@@ -97,10 +97,9 @@ export const postsApi = {
     return res.data;
   },
 
-  createPost: async (content: string, imageUrl?: string): Promise<Post> => {
+  createPost: async (content: string): Promise<Post> => {
     const res = await apiClient.post<Post>("/posts", {
       content,
-      image_url: imageUrl ?? null,
     });
     return res.data;
   },
