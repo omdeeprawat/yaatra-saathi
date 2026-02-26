@@ -20,7 +20,7 @@ class User(Base):
   is_active = Column(Boolean, default= True)
   is_verified = Column(Boolean, default= False)
   created_at = Column(DateTime(timezone = True), server_default=func.now())
-  updated_At = Column(DateTime(timezone = True), onupdate= func.now())
+  updated_at = Column(DateTime(timezone = True), onupdate= func.now())
 
-  # relationship
-  # posts = relationship("Post", back_populates = "author")
+  # relationships
+  posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
