@@ -2,10 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from core.config import settings
-from db.database import Base, engine
 from routers import health, auth, posts
 
-Base.metadata.create_all(bind=engine)
+import models 
 
 app = FastAPI(
     title = "yaatra-saathi",
@@ -32,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(posts.router)
 
 
 @app.get("/")
