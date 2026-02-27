@@ -1,12 +1,12 @@
-import { useState} from 'react';
-import type { FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mountain, UserPlus } from 'lucide-react';
-import {Globe} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import InputField from '@/components/ui/InputField';
-import Spinner from '@/components/ui/Spinner';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mountain, UserPlus } from "lucide-react";
+import { GoogleLogo as GoogleLogoIcon } from "@phosphor-icons/react";
+import { useAuth } from "@/hooks/useAuth";
+import InputField from "@/components/ui/InputField";
+import Spinner from "@/components/ui/Spinner";
+import toast from "react-hot-toast";
 
 interface FormState {
   full_name: string;
@@ -27,26 +27,29 @@ export default function Register() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>({
-    full_name: '',
-    email: '',
-    password: '',
-    confirm_password: '',
+    full_name: "",
+    email: "",
+    password: "",
+    confirm_password: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const update = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm(f => ({ ...f, [field]: e.target.value }));
+  const update =
+    (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((f) => ({ ...f, [field]: e.target.value }));
 
   const validate = (): boolean => {
     const errs: FormErrors = {};
-    if (!form.full_name.trim()) errs.full_name = 'Full name is required';
-    if (!form.email) errs.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email';
-    if (!form.password) errs.password = 'Password is required';
-    else if (form.password.length < 8) errs.password = 'Password must be at least 8 characters';
+    if (!form.full_name.trim()) errs.full_name = "Full name is required";
+    if (!form.email) errs.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email))
+      errs.email = "Enter a valid email";
+    if (!form.password) errs.password = "Password is required";
+    else if (form.password.length < 8)
+      errs.password = "Password must be at least 8 characters";
     if (form.password !== form.confirm_password)
-      errs.confirm_password = 'Passwords do not match';
+      errs.confirm_password = "Passwords do not match";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -62,12 +65,12 @@ export default function Register() {
         full_name: form.full_name,
         password: form.password,
       });
-      toast.success('Account created! Welcome to Yatra Saathi 🏔');
-      navigate('/dashboard', { replace: true });
+      toast.success("Account created! Welcome to Yatra Saathi 🏔");
+      navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail || 'Registration failed. Please try again.';
+          ?.detail || "Registration failed. Please try again.";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -76,14 +79,12 @@ export default function Register() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
-
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-saffron-500/10 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">
-
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
@@ -92,13 +93,14 @@ export default function Register() {
               Yatra <span className="text-saffron-500">Saathi</span>
             </span>
           </div>
-          <h1 className="font-display text-3xl text-stone-100 mb-2">Begin your journey</h1>
+          <h1 className="font-display text-3xl text-stone-100 mb-2">
+            Begin your journey
+          </h1>
           <p className="font-body text-stone-400">Create your free account</p>
         </div>
 
         {/* Card */}
         <div className="card border-mountain-600/50">
-
           {/* Google OAuth */}
           <button
             onClick={googleLogin}
@@ -108,14 +110,16 @@ export default function Register() {
                        text-stone-200 font-sans text-sm font-medium
                        transition-all duration-200 mb-6"
           >
-            <Globe className="w-4 h-4" />
+            <GoogleLogoIcon size={32} />
             Sign up with Google
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-mountain-700" />
-            <span className="font-sans text-xs text-stone-500">or register with email</span>
+            <span className="font-sans text-xs text-stone-500">
+              or register with email
+            </span>
             <div className="flex-1 h-px bg-mountain-700" />
           </div>
 
@@ -124,9 +128,9 @@ export default function Register() {
             <InputField
               label="Full Name"
               type="text"
-              placeholder="Arjun Rawat"
+              placeholder="omdeep rawat"
               value={form.full_name}
-              onChange={update('full_name')}
+              onChange={update("full_name")}
               error={errors.full_name}
               autoComplete="name"
             />
@@ -135,7 +139,7 @@ export default function Register() {
               type="email"
               placeholder="you@example.com"
               value={form.email}
-              onChange={update('email')}
+              onChange={update("email")}
               error={errors.email}
               autoComplete="email"
             />
@@ -144,7 +148,7 @@ export default function Register() {
               type="password"
               placeholder="At least 8 characters"
               value={form.password}
-              onChange={update('password')}
+              onChange={update("password")}
               error={errors.password}
               autoComplete="new-password"
             />
@@ -153,7 +157,7 @@ export default function Register() {
               type="password"
               placeholder="Repeat your password"
               value={form.confirm_password}
-              onChange={update('confirm_password')}
+              onChange={update("confirm_password")}
               error={errors.confirm_password}
               autoComplete="new-password"
             />
@@ -184,8 +188,11 @@ export default function Register() {
 
         {/* Login link */}
         <p className="text-center font-sans text-sm text-stone-400 mt-6">
-          Already have an account?{' '}
-          <Link to="/login" className="text-saffron-400 hover:text-saffron-300 font-medium">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-saffron-400 hover:text-saffron-300 font-medium"
+          >
             Sign in
           </Link>
         </p>
