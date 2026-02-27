@@ -4,6 +4,7 @@ import type {
   TokenResponse,
   LoginRequest,
   RegisterRequest,
+  UpdateProfileRequest,
   User,
   PaginatedResponse,
   Post,
@@ -79,6 +80,11 @@ export const authApi = {
 
   getMe: async (): Promise<User> => {
     const res = await apiClient.get<User>("/auth/me");
+    return res.data;
+  },
+
+  updateProfile: async (data: UpdateProfileRequest): Promise<User> => {
+    const res = await apiClient.patch<User>("/auth/profile", data);
     return res.data;
   },
 
