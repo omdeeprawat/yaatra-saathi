@@ -1,28 +1,29 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import * as path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import tailwindcss from "@tailwindcss/vite";
+import * as path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8000',
+      "/api": {
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        cookieDomainRewrite: 'localhost',
+        rewrite: (path) => path.replace(/^\/api/, ""),
+        cookieDomainRewrite: "localhost",
       },
-      'auth' : {
-        target: 'http://127.0.0.1:800',
+      auth: {
+        target: "http://127.0.0.1:800",
         changeOrigin: true,
-      }
+      },
     },
   },
-})
+});

@@ -1,68 +1,192 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* Custom theme */
+@theme {
+  /* Mountain (dark slate/blue backgrounds) */
+  --color-mountain-950: #0a0c14;
+  --color-mountain-900: #0f1221;
+  --color-mountain-800: #171b30;
+  --color-mountain-700: #232844;
+  --color-mountain-600: #313758;
+  --color-mountain-500: #454d72;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* Saffron (accent orange) */
+  --color-saffron-300: #fcd28d;
+  --color-saffron-400: #f9a825;
+  --color-saffron-500: #f97316;
+  --color-saffron-600: #e05d0a;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  /* Fonts */
+  --font-display: "DM Serif Display", serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-sans: "DM Sans", sans-serif;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ── Light-theme overrides ───────────────────────────────── */
+html.light {
+  --color-mountain-950: #f8f9fc;
+  --color-mountain-900: #f1f3f9;
+  --color-mountain-800: #e4e7f0;
+  --color-mountain-700: #cdd2e0;
+  --color-mountain-600: #b0b8cd;
+  --color-mountain-500: #8a94b2;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Base resets */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--color-mountain-950);
+    color: #e7e5e4;
+    min-height: 100vh;
+  }
+
+  html.light body {
+    background-color: #f8f9fc;
+    color: #1e1e2f;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
+/* Component utility classes */
+@layer components {
+  /* Card */
+  .card {
+    background-color: var(--color-mountain-900);
+    border: 1px solid var(--color-mountain-700);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition:
+      background-color 0.3s,
+      border-color 0.3s,
+      box-shadow 0.3s;
+  }
+  html.light .card {
     background-color: #ffffff;
+    border-color: #d8dce6;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   }
-  a:hover {
-    color: #747bff;
+
+  /* Primary button */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.875rem;
+    background: linear-gradient(
+      to right,
+      var(--color-saffron-500),
+      var(--color-saffron-600)
+    );
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
   }
-  button {
-    background-color: #f9f9f9;
+  .btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
   }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.875rem;
+    background-color: transparent;
+    color: #d6d3d1;
+    border: 1px solid var(--color-mountain-600);
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-mountain-800);
+    border-color: var(--color-mountain-500);
+  }
+  html.light .btn-secondary {
+    color: #3b3b4f;
+    border-color: #c5cad6;
+  }
+  html.light .btn-secondary:hover {
+    background-color: #eef0f6;
+    border-color: #a0a8bc;
+  }
+
+  /* Nav link */
+  .nav-link {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #a8a29e;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-link:hover {
+    color: #e7e5e4;
+  }
+  html.light .nav-link {
+    color: #5c5c72;
+  }
+  html.light .nav-link:hover {
+    color: #1e1e2f;
+  }
+}
+
+/* ── Light-theme helper text overrides ───────────────────── */
+html.light .text-stone-100 {
+  color: #1e1e2f !important;
+}
+html.light .text-stone-200 {
+  color: #2d2d42 !important;
+}
+html.light .text-stone-300 {
+  color: #3b3b4f !important;
+}
+html.light .text-stone-400 {
+  color: #5c5c72 !important;
+}
+html.light .text-stone-500 {
+  color: #7a7a90 !important;
+}
+html.light .text-stone-600 {
+  color: #9898aa !important;
 }

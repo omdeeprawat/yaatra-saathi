@@ -1,4 +1,4 @@
-//  Auth 
+//  Auth
 
 export interface User {
   id: number;
@@ -6,7 +6,7 @@ export interface User {
   full_name: string;
   avatar_url: string | null;
   is_active: boolean;
-  auth_provider: 'email' | 'google';
+  auth_provider: "email" | "google";
 }
 
 export interface AuthState {
@@ -21,6 +21,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface UpdateProfileRequest {
+  full_name?: string;
+  avatar_url?: string;
+}
+
 export interface RegisterRequest {
   email: string;
   full_name: string;
@@ -30,10 +35,10 @@ export interface RegisterRequest {
 export interface TokenResponse {
   access_token: string;
   token_type: string;
-  user: User;            
+  user: User;
 }
 
-// Posts 
+// Posts
 
 export interface Post {
   id: number;
@@ -52,7 +57,7 @@ export interface CreatePostRequest {
   image_url?: string;
 }
 
-// Map 
+// Map
 export interface YatraStop {
   id: number;
   name: string;
@@ -65,7 +70,7 @@ export interface YatraStop {
   cumulative_km: number;
   description: string | null;
   significance: string | null;
-  stop_type: 'start' | 'camp' | 'bugyal' | 'destination';
+  stop_type: "start" | "camp" | "bugyal" | "destination";
   photos: string[];
 }
 
@@ -73,13 +78,13 @@ export interface YatraStop {
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   image_url?: string;
   timestamp: Date;
 }
 
-// API 
+// API
 
 export interface ApiError {
   detail: string;

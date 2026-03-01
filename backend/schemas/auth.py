@@ -25,6 +25,17 @@ class LoginRequest(BaseModel):
   email : EmailStr
   password : str
 
+class UpdateProfileRequest(BaseModel):
+  full_name: str | None = None
+  avatar_url: str | None = None
+
+  @field_validator("full_name")
+  @classmethod
+  def name_not_empty(cls, v: str | None) -> str | None:
+    if v is not None and not v.strip():
+      raise ValueError("Name cannot be empty")
+    return v.strip() if v else v
+
 class TokenResponse(BaseModel):
   access_token : str
   token_type : str = "bearer"

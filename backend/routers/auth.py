@@ -5,7 +5,7 @@ from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request 
 
 from core.config import settings
-from schemas.auth import UserResponse, TokenResponse, RegisterRequest, LoginRequest
+from schemas.auth import UserResponse, TokenResponse, RegisterRequest, LoginRequest, UpdateProfileRequest
 from db.database import get_db
 from core.security import create_access_token, create_refresh_token, decode_refresh_token
 from core.dependencies import get_current_user, get_user_by_id
@@ -79,6 +79,22 @@ def refresh(response: Response, db :Session = Depends(get_db), refresh_token: Op
   return TokenResponse(access_token=new_access_token, user= UserResponse.model_validate(user))
 
 
+@router.patch("/profile", response_model=UserResponse)
+def update_profile(
+  data: UpdateProfileRequest,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+):
+  """Update the current user's profile (full_name, avatar_url)."""
+  if data.full_name is not None:
+    current_user.full_name = data.full_name
+  if data.avatar_url is not None:
+    current_user.avatar_url = data.avatar_url
+  db.commit()
+  db.refresh(current_user)
+  return current_user
+
+
 @router.post("/logout")
 def logout(response : Response):
   response.delete_cookie("refresh_token")
@@ -145,5 +161,5 @@ async def google_callback(request : Request, db : Session = Depends(get_db)):
 
   # Redirect to frontend with token in URL fragment
   # Frontend reads it from the URL and stores in localStorage
-  frontend_url = f"http://localhost:5173/auth/callback?token={jwt_token}"
+  frontend_url = f"{settings.FRONTEND_URL}/auth/callback?token={jwt_token}"
   return RedirectResponse(url=frontend_url)
