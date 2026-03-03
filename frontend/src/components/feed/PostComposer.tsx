@@ -19,11 +19,11 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDropzone, setShowDropzone] = useState(false);
 
-  const{
-    image, 
-    isUploading, 
-    uploadProgress, 
-    selectImage, 
+  const {
+    image,
+    isUploading,
+    uploadProgress,
+    selectImage,
     clearImage,
     uploadImage,
   } = useImageUpload();
@@ -40,12 +40,11 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
     setIsSubmitting(true);
     try {
       let imageUrl: string | undefined;
-      if (image?.file){
+      if (image?.file) {
         const uploaded = await uploadImage();
         imageUrl = uploaded ?? undefined;
       }
       await onSubmit(content.trim(), imageUrl);
-
 
       setContent("");
       clearImage();
@@ -55,16 +54,15 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
     }
   };
 
-
   const handleImageSelect = (file: File) => {
     const valid = selectImage(file);
     if (!valid) setShowDropzone(false);
-  }
+  };
 
   const handleClearImage = () => {
     clearImage();
     setShowDropzone(false);
-  }
+  };
 
   if (!user) return null;
 
@@ -104,19 +102,20 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
             className="flex items-center justify-between pt-3
                           border-t border-mountain-700/50 mt-3"
           >
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               {/* Image toggle button */}
               {!image && (
                 <button
                   type="button"
-                  onClick={() => setShowDropzone(v => !v)}
+                  onClick={() => setShowDropzone((v) => !v)}
                   disabled={isBusy}
                   className={`p-1.5 rounded-md transition-colors
-                    ${showDropzone
-                      ? 'text-saffron-400 bg-saffron-500/10'
-                      : 'text-stone-500 hover:text-stone-300 hover:bg-mountain-700/50'
+                    ${
+                      showDropzone
+                        ? "text-saffron-400 bg-saffron-500/10"
+                        : "text-stone-500 hover:text-stone-300 hover:bg-mountain-700/50"
                     }`}
-                  title={showDropzone ? 'Hide image upload' : 'Add image'}
+                  title={showDropzone ? "Hide image upload" : "Add image"}
                 >
                   {showDropzone ? (
                     <X className="w-4 h-4" />
@@ -126,22 +125,21 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
                 </button>
               )}
 
+              {/* Character counter */}
+              <span
+                className={`font-sans text-xs ${
+                  isOverLimit
+                    ? "text-red-400"
+                    : charsLeft < 100
+                      ? "text-amber-400"
+                      : "text-stone-600"
+                }`}
+              >
+                {charsLeft}
+              </span>
+            </div>
 
-            {/* Character counter */}
-            <span
-              className={`font-sans text-xs ${
-                isOverLimit
-                  ? "text-red-400"
-                  : charsLeft < 100
-                    ? "text-amber-400"
-                    : "text-stone-600"
-              }`}
-            >
-              {charsLeft}
-            </span>
-          </div>
-          
-             {/* Submit button */}
+            {/* Submit button */}
             <button
               onClick={handleSubmit}
               disabled={isEmpty || isOverLimit || isBusy}
@@ -150,7 +148,7 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
               {isBusy ? (
                 <>
                   <Spinner size="small" />
-                  {isUploading ? 'Uploading...' : 'Posting...'}
+                  {isUploading ? "Uploading..." : "Posting..."}
                 </>
               ) : (
                 <>
