@@ -43,8 +43,8 @@ export default function Feed() {
   const allPosts: Post[] = data?.pages.flatMap((page) => page.items) ?? [];
 
   // Handler passed to PostComposer
-  const handleSubmit = async (content: string) => {
-    await createPost({ content });
+  const handleSubmit = async (content: string, imageUrl?: string) => {
+    await createPost({ content, imageUrl });
   };
 
   return (
