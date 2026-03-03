@@ -22,8 +22,8 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ content }: { content: string }) =>
-      postsApi.createPost(content),
+    mutationFn: ({ content, imageUrl }: { content: string; imageUrl?: string }) =>
+      postsApi.createPost(content, imageUrl),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
       toast.success("Post shared!");
