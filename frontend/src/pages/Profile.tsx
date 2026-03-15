@@ -120,7 +120,7 @@ export default function Profile() {
             type="email"
             value={user?.email ?? ""}
             disabled
-            className="w-full rounded-lg bg-mountain-800 border border-mountain-600 px-4 py-2.5 text-stone-400 text-sm cursor-not-allowed"
+            className="w-full rounded bg-mountain-800 border border-mountain-600 px-4 py-2.5 text-stone-400 text-sm cursor-not-allowed"
           />
           <p className="text-xs text-stone-600 mt-1">Email cannot be changed</p>
         </div>
@@ -137,7 +137,7 @@ export default function Profile() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full rounded-lg bg-mountain-800 border border-mountain-600 focus:border-saffron-500 focus:ring-1 focus:ring-saffron-500 px-4 py-2.5 text-stone-100 text-sm outline-none transition-colors"
+            className="w-full rounded bg-mountain-800 border border-mountain-600 focus:border-saffron-500 focus:ring-1 focus:ring-saffron-500 px-4 py-2.5 text-stone-100 text-sm outline-none transition-colors"
             placeholder="Your name"
           />
         </div>
