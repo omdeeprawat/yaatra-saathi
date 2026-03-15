@@ -55,7 +55,7 @@ export default function Login() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-mountain-600/20 blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-saffron-500/5 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">
@@ -80,7 +80,7 @@ export default function Login() {
           {/* Google OAuth button */}
           <button
             onClick={googleLogin}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded
                        border border-mountain-500/50 hover:border-mountain-400
                        bg-mountain-800/50 hover:bg-mountain-700/50
                        text-stone-200 font-sans text-sm font-medium

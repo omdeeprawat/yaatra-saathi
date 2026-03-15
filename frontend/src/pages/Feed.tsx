@@ -53,7 +53,7 @@ export default function Feed() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <Users className="w-6 h-6 text-saffron-500" />
-          <span className="font-sans text-sm text-saffron-400 uppercase tracking-widest">
+          <span className="font-sans text-[11px] text-stone-600 uppercase tracking-[3px]">
             Community
           </span>
         </div>

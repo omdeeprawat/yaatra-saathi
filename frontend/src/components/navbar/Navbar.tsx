@@ -70,7 +70,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <Mountain className="w-7 h-7 text-saffron-500 group-hover:text-saffron-400 transition-colors" />
-            <span className="font-display text-lg font-bold tracking-wide text-stone-100">
+            <span className="font-display text-lg font-bold tracking-wider text-stone-100">
               Yatra <span className="text-saffron-500">Saathi</span>
             </span>
           </Link>
@@ -94,7 +94,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-stone-400 hover:text-saffron-400 hover:bg-mountain-800 transition-colors"
+              className="p-2 rounded text-stone-400 hover:text-saffron-400 hover:bg-mountain-800 transition-colors"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -125,7 +125,7 @@ export default function Navbar() {
                 {/* Dropdown */}
                 {dropdownOpen && (
                   <div
-                    className={`absolute right-0 mt-2 w-56 rounded-xl border shadow-xl py-2 z-50 transition-colors duration-300 ${
+                    className={`absolute right-0 mt-2 w-56 rounded border shadow-xl py-2 z-50 transition-colors duration-300 ${
                       isLight
                         ? "bg-white border-slate-200 shadow-slate-200/50"
                         : "bg-mountain-800 border-mountain-600 shadow-black/30"

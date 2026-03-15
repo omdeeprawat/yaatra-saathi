@@ -78,7 +78,7 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
 
       {/* Image */}
       {post.image_url && !imgError && (
-        <div className="rounded-lg overflow-hidden border border-mountain-700/40 mb-2">
+        <div className="rounded overflow-hidden border border-mountain-700/40 mb-2">
           <img
             src={post.image_url}
             alt="Post attachment"

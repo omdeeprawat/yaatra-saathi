@@ -15,7 +15,6 @@ import PostCardSkeleton from "@/components/feed/PostCardSkeleton";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useRef } from "react";
 
-/* ── Intersection-observer fade-in hook ────────────────── */
 function useFadeIn() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -56,9 +55,9 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden">
-      {/* ── Hero Section ─────────────────────────────────────────────── */}
+      
       <section className="relative px-4 py-20 sm:py-28 overflow-hidden">
-        {/* Background layers */}
+        
         <div
           className={`absolute inset-0 transition-colors duration-500 ${
             isLight
@@ -84,20 +83,20 @@ export default function Home() {
           className="relative max-w-5xl mx-auto text-center opacity-0 translate-y-6 transition-all duration-700 ease-out"
         >
           <div
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-6 transition-colors duration-300 ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded border mb-6 transition-colors duration-300 ${
               isLight
                 ? "border-saffron-500/40 bg-saffron-500/10"
                 : "border-saffron-500/30 bg-saffron-500/10"
             }`}
           >
             <SparkleIcon size={16} className="text-saffron-400" />
-            <span className="font-sans text-sm text-saffron-300 font-medium">
+            <span className="font-sans text-xs text-saffron-300 font-medium tracking-widest uppercase">
               AI-Powered Pilgrimage Companion
             </span>
           </div>
 
           <h1
-            className="font-display text-4xl sm:text-5xl md:text-6xl font-bold
+            className="font-display text-4xl sm:text-5xl md:text-5xl font-bold
                          text-stone-100 leading-tight mb-6"
           >
             <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default">
@@ -143,7 +142,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Stats — hover enlarge each stat */}
           <div className="mt-16 grid grid-cols-3 gap-6 max-w-2xl mx-auto">
             {[
               { value: "280km", label: "Total Distance" },
@@ -157,7 +155,7 @@ export default function Home() {
                 <p className="font-display text-2xl sm:text-3xl font-bold text-saffron-400 mb-1 group-hover:text-saffron-300 transition-colors">
                   {stat.value}
                 </p>
-                <p className="font-sans text-xs sm:text-sm text-stone-500 uppercase tracking-wide">
+                <p className="font-sans text-[14px] text-stone-600 uppercase tracking-[3px]">
                   {stat.label}
                 </p>
               </div>
@@ -166,16 +164,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Features ─────────────────────────────────────────────────── */}
+     
       <section
         ref={featuresRef}
         className="max-w-6xl mx-auto px-4 py-16 opacity-0 translate-y-6 transition-all duration-700 ease-out"
       >
         <div className="text-center mb-12">
-          <span className="font-sans text-sm text-saffron-400 uppercase tracking-widest">
+          <span className="font-sans text-[18px] text-stone-600 uppercase tracking-[3px]">
             Features
           </span>
-          <h2 className="font-display text-3xl text-stone-100 mt-2 inline-block transition-transform duration-300 cursor-default">
+          <h2 className="font-display text-2xl text-stone-100 mt-3 inline-block transition-transform duration-300 cursor-default">
             Everything You Need for the Journey
           </h2>
         </div>
@@ -216,7 +214,7 @@ export default function Home() {
                 }`}
               >
                 <div
-                  className={`w-12 h-12 rounded-xl border flex items-center justify-center
+                  className={`w-12 h-12 rounded border flex items-center justify-center
                                  mb-4 ${feature.color} group-hover:scale-110 transition-transform duration-300`}
                 >
                   <Icon size={24} />
@@ -243,10 +241,10 @@ export default function Home() {
       >
         <div className="flex items-center justify-between mb-8">
           <div>
-            <span className="font-sans text-sm text-saffron-400 uppercase tracking-widest">
+            <span className="font-sans text-[18px] text-stone-600 uppercase tracking-[3px]">
               Community
             </span>
-            <h2 className="font-display text-3xl text-stone-100 mt-1 inline-block duration-300 cursor-default">
+            <h2 className="font-display text-2xl text-stone-100 mt-2 inline-block duration-300 cursor-default">
               Latest from Pilgrims
             </h2>
           </div>

@@ -39,7 +39,7 @@ export default function Dashboard() {
       <div className="mb-12">
         <div className="flex items-center gap-3 mb-2">
           <Mountain className="w-7 h-7 text-saffron-500" />
-          <span className="font-sans text-sm text-saffron-400 uppercase tracking-widest">
+          <span className="font-sans text-[11px] text-stone-600 uppercase tracking-[3px]">
             Dashboard
           </span>
         </div>
@@ -71,7 +71,7 @@ export default function Dashboard() {
 
       {/* Account info */}
       <div className="mt-12 card border-mountain-700/30">
-        <h2 className="font-sans font-semibold text-stone-200 mb-4">Your Account</h2>
+        <h2 className="font-sans font-semibold text-stone-200 text-sm uppercase tracking-[2px] mb-4">Your Account</h2>
         <div className="flex items-center gap-4">
           {user?.avatar_url ? (
             <img src={user.avatar_url} alt="" className="w-12 h-12 rounded-full" />
@@ -85,7 +85,7 @@ export default function Dashboard() {
           <div>
             <p className="font-sans font-medium text-stone-100">{user?.full_name}</p>
             <p className="font-sans text-sm text-stone-400">{user?.email}</p>
-            <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-mountain-700/50 text-xs font-sans text-stone-400 capitalize">
+            <span className="inline-block mt-1 px-2 py-0.5 rounded bg-mountain-700/50 text-xs font-sans text-stone-400 capitalize">
               {user?.auth_provider} account
             </span>
           </div>
