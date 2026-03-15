@@ -104,7 +104,7 @@ export default function Register() {
           {/* Google OAuth */}
           <button
             onClick={googleLogin}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded
                        border border-mountain-500/50 hover:border-mountain-400
                        bg-mountain-800/50 hover:bg-mountain-700/50
                        text-stone-200 font-sans text-sm font-medium
