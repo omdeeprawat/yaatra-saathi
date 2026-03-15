@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Trash2, ImageIcon } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import type { Post } from '@/types';
-import Avatar from '@/components/ui/Avatar';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from "react";
+import { Trash2, ImageIcon } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import type { Post } from "@/types";
+import Avatar from "@/components/ui/Avatar";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostCardProps {
   post: Post;
@@ -16,12 +16,15 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isOwner = user?.id === post.author.id;
-  const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
+  const timeAgo = formatDistanceToNow(new Date(post.created_at), {
+    addSuffix: true,
+  });
 
   return (
-    <article className="card border-mountain-700/40 hover:border-mountain-600/60
-                        transition-all duration-200 group">
-
+    <article
+      className="card border-mountain-700/40 hover:border-mountain-600/60
+                        transition-all duration-200 group"
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -43,7 +46,9 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             {showDeleteConfirm ? (
               <div className="flex items-center gap-2">
-                <span className="font-sans text-xs text-stone-400">Delete?</span>
+                <span className="font-sans text-xs text-stone-400">
+                  Delete?
+                </span>
                 <button
                   onClick={() => onDelete(post.id)}
                   className="font-sans text-xs text-red-400 hover:text-red-300 font-medium"

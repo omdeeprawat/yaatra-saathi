@@ -55,9 +55,7 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden">
-      
       <section className="relative px-4 py-20 sm:py-28 overflow-hidden">
-        
         <div
           className={`absolute inset-0 transition-colors duration-500 ${
             isLight
@@ -164,7 +162,6 @@ export default function Home() {
         </div>
       </section>
 
-     
       <section
         ref={featuresRef}
         className="max-w-6xl mx-auto px-4 py-16 opacity-0 translate-y-6 transition-all duration-700 ease-out"

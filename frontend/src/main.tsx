@@ -132,14 +132,14 @@ function App() {
               toastOptions={{
                 duration: 3000,
                 style: {
-                  background: "#1e1b4b",
-                  color: "#f1f0f0",
-                  border: "1px solid #4338ca",
-                  fontFamily: "DM Sans, sans-serif",
+                  background: "#0f0f16",
+                  color: "#E0E0E0",
+                  border: "1px solid #1e1e2a",
+                  fontFamily: "'Courier New', 'Courier', monospace",
                   fontSize: "14px",
                 },
                 success: {
-                  iconTheme: { primary: "#f97316", secondary: "#fff" },
+                  iconTheme: { primary: "#00E5FF", secondary: "#0A0A0F" },
                 },
               }}
             />

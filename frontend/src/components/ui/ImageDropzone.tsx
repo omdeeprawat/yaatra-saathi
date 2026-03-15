@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { ImagePlus, X, Upload } from 'lucide-react';
-import clsx from 'clsx';
+import { useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { ImagePlus, X, Upload } from "lucide-react";
+import clsx from "clsx";
 
 interface ImageDropzoneProps {
   previewUrl: string | null;
@@ -22,21 +22,23 @@ export default function ImageDropzone({
     (accepted: File[]) => {
       if (accepted[0]) onFileSelect(accepted[0]);
     },
-    [onFileSelect]
+    [onFileSelect],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.gif'] },
+    accept: { "image/*": [".jpg", ".jpeg", ".png", ".webp", ".gif"] },
     maxFiles: 1,
     disabled: isUploading,
   });
 
-  // Preview mode 
+  // Preview mode
   if (previewUrl) {
     return (
-      <div className="relative rounded-xl overflow-hidden border border-mountain-600/50
-                      group max-h-64">
+      <div
+        className="relative rounded overflow-hidden border border-mountain-600/50
+                      group max-h-64"
+      >
         <img
           src={previewUrl}
           alt="Preview"
@@ -45,8 +47,10 @@ export default function ImageDropzone({
 
         {/* Upload progress overlay */}
         {isUploading && (
-          <div className="absolute inset-0 bg-mountain-900/70 flex flex-col
-                          items-center justify-center gap-3">
+          <div
+            className="absolute inset-0 bg-mountain-900/70 flex flex-col
+                          items-center justify-center gap-3"
+          >
             <Upload className="w-6 h-6 text-saffron-400 animate-bounce" />
             <div className="w-48 h-1.5 bg-mountain-700 rounded-full overflow-hidden">
               <div
@@ -63,7 +67,10 @@ export default function ImageDropzone({
         {/* Remove button */}
         {!isUploading && (
           <button
-            onClick={e => { e.stopPropagation(); onClear(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
             className="absolute top-2 right-2 w-7 h-7 rounded-full
                        bg-mountain-900/80 hover:bg-red-500/80
                        flex items-center justify-center
@@ -78,27 +85,29 @@ export default function ImageDropzone({
     );
   }
 
-  // Dropzone mode 
+  // Dropzone mode
   return (
     <div
       {...getRootProps()}
       className={clsx(
-        'border-2 border-dashed rounded-xl p-6 text-center cursor-pointer',
-        'transition-all duration-200',
+        "border-2 border-dashed rounded p-6 text-center cursor-pointer",
+        "transition-all duration-200",
         isDragActive
-          ? 'border-saffron-500 bg-saffron-500/5'
-          : 'border-mountain-600/50 hover:border-mountain-500 hover:bg-mountain-800/30'
+          ? "border-saffron-500 bg-saffron-500/5"
+          : "border-mountain-600/50 hover:border-mountain-500 hover:bg-mountain-800/30",
       )}
     >
       <input {...getInputProps()} />
-      <ImagePlus className={clsx(
-        'w-8 h-8 mx-auto mb-3 transition-colors',
-        isDragActive ? 'text-saffron-400' : 'text-stone-600'
-      )} />
+      <ImagePlus
+        className={clsx(
+          "w-8 h-8 mx-auto mb-3 transition-colors",
+          isDragActive ? "text-saffron-400" : "text-stone-600",
+        )}
+      />
       <p className="font-sans text-sm text-stone-400">
         {isDragActive
-          ? 'Drop your image here'
-          : 'Drag & drop or click to add an image'}
+          ? "Drop your image here"
+          : "Drag & drop or click to add an image"}
       </p>
       <p className="font-sans text-xs text-stone-600 mt-1">
         JPEG, PNG, WebP, GIF · Max 5MB
