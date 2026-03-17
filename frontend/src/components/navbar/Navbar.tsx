@@ -94,7 +94,8 @@ export default function Navbar() {
                     isLight
                       ? "text-slate-700 hover:text-slate-900"
                       : "text-stone-300 hover:text-stone-100",
-                    isActive && (isLight ? "text-saffron-600" : "text-saffron-400"),
+                    isActive &&
+                      (isLight ? "text-saffron-600" : "text-saffron-400"),
                   )
                 }
               >
@@ -248,7 +249,8 @@ export default function Navbar() {
                   isLight
                     ? "text-slate-700 hover:text-slate-900"
                     : "text-stone-300 hover:text-stone-100",
-                  isActive && (isLight ? "text-saffron-600" : "text-saffron-400"),
+                  isActive &&
+                    (isLight ? "text-saffron-600" : "text-saffron-400"),
                 )
               }
               onClick={() => setMenuOpen(false)}
