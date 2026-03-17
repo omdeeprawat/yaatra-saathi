@@ -18,6 +18,8 @@ import Chat from "@/pages/Chat";
 import Map from "@/pages/Map";
 import Feed from "@/pages/Feed";
 import Profile from "@/pages/Profile";
+import StoryDetail from "./pages/StoryDetail";
+import Stories from "@/pages/Stories";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,7 +75,8 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/feed" element={<Feed />} />
                 <Route path="/map" element={<Map />} />
-
+                <Route path="/stories" element={<Stories />} />
+                <Route path="/stories/:slug" element={<StoryDetail />} />
                 {/* Guest-only routes */}
                 <Route
                   path="/login"
