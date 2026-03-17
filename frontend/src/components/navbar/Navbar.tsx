@@ -44,6 +44,7 @@ export default function Navbar() {
 
   const publicLinks = [
     { to: "/", label: "Home" },
+    { to: "/stories", label: "Stories" },
     { to: "/feed", label: "Community" },
   ];
 
@@ -52,6 +53,7 @@ export default function Navbar() {
     { to: "/chat", label: "AI Guide" },
     { to: "/map", label: "Route Map" },
     { to: "/feed", label: "Community" },
+    { to: "/stories", label: "Stories" },
   ];
 
   const links = isAuthenticated ? privateLinks : publicLinks;
@@ -70,7 +72,12 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <Mountain className="w-7 h-7 text-saffron-500 group-hover:text-saffron-400 transition-colors" />
-            <span className="font-display text-lg font-bold tracking-wider text-stone-100">
+            <span
+              className={clsx(
+                "font-display text-lg font-bold tracking-wider",
+                isLight ? "text-slate-900" : "text-stone-100",
+              )}
+            >
               Yatra <span className="text-saffron-500">Saathi</span>
             </span>
           </Link>
@@ -82,7 +89,13 @@ export default function Navbar() {
                 key={link.to}
                 to={link.to}
                 className={({ isActive }) =>
-                  clsx("nav-link", isActive && "text-saffron-400")
+                  clsx(
+                    "nav-link",
+                    isLight
+                      ? "text-slate-700 hover:text-slate-900"
+                      : "text-stone-300 hover:text-stone-100",
+                    isActive && (isLight ? "text-saffron-600" : "text-saffron-400"),
+                  )
                 }
               >
                 {link.label}
@@ -94,7 +107,12 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded text-stone-400 hover:text-saffron-400 hover:bg-mountain-800 transition-colors"
+              className={clsx(
+                "p-2 rounded transition-colors",
+                isLight
+                  ? "text-slate-600 hover:text-saffron-600 hover:bg-slate-100"
+                  : "text-stone-400 hover:text-saffron-400 hover:bg-mountain-800",
+              )}
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -135,10 +153,20 @@ export default function Navbar() {
                     <div
                       className={`px-4 py-2.5 border-b ${isLight ? "border-slate-200" : "border-mountain-700"}`}
                     >
-                      <p className="text-sm font-semibold text-stone-100 truncate">
+                      <p
+                        className={clsx(
+                          "text-sm font-semibold truncate",
+                          isLight ? "text-slate-900" : "text-stone-100",
+                        )}
+                      >
                         {user?.full_name}
                       </p>
-                      <p className="text-xs text-stone-500 truncate">
+                      <p
+                        className={clsx(
+                          "text-xs truncate",
+                          isLight ? "text-slate-500" : "text-stone-500",
+                        )}
+                      >
                         {user?.email}
                       </p>
                     </div>
@@ -184,7 +212,12 @@ export default function Navbar() {
 
           {/* Mobile menu toggle */}
           <button
-            className="md:hidden text-stone-400 hover:text-stone-200"
+            className={clsx(
+              "md:hidden",
+              isLight
+                ? "text-slate-700 hover:text-slate-900"
+                : "text-stone-400 hover:text-stone-200",
+            )}
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? (
@@ -209,7 +242,15 @@ export default function Navbar() {
             <NavLink
               key={link.to}
               to={link.to}
-              className="nav-link text-base"
+              className={({ isActive }) =>
+                clsx(
+                  "nav-link text-base",
+                  isLight
+                    ? "text-slate-700 hover:text-slate-900"
+                    : "text-stone-300 hover:text-stone-100",
+                  isActive && (isLight ? "text-saffron-600" : "text-saffron-400"),
+                )
+              }
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
@@ -217,7 +258,12 @@ export default function Navbar() {
           ))}
           <button
             onClick={toggleTheme}
-            className="nav-link text-base flex items-center gap-2"
+            className={clsx(
+              "nav-link text-base flex items-center gap-2",
+              isLight
+                ? "text-slate-700 hover:text-slate-900"
+                : "text-stone-300 hover:text-stone-100",
+            )}
           >
             {theme === "dark" ? (
               <Sun className="w-4 h-4" />
