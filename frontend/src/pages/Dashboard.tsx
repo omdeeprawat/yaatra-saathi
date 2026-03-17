@@ -1,11 +1,12 @@
-import { Mountain, MessageSquare, Map, Users } from "lucide-react";
+import { Mountain, Map, Users, ScrollText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { ChatCenteredDotsIcon } from "@phosphor-icons/react";
 
 const quickLinks = [
   {
     to: "/chat",
-    icon: MessageSquare,
+    icon: ChatCenteredDotsIcon,
     title: "AI Yatra Guide",
     desc: "Ask anything about the pilgrimage route, rituals, and history.",
     color: "text-saffron-400",
@@ -27,6 +28,14 @@ const quickLinks = [
     color: "text-emerald-400",
     bg: "bg-emerald-500/10 border-emerald-500/20",
   },
+  {
+    to: "/stories",
+    icon: ScrollText,
+    title: "Sacred Stories",
+    desc: "Explore legends, history, and cultural tales of the Yatra.",
+    color: "text-purple-400",
+    bg: "bg-purple-500/10 border-purple-500/20",
+  },
 ];
 
 export default function Dashboard() {
@@ -38,7 +47,7 @@ export default function Dashboard() {
       <div className="mb-12">
         <div className="flex items-center gap-3 mb-2">
           <Mountain className="w-7 h-7 text-saffron-500" />
-          <span className="font-sans text-[11px] text-stone-600 uppercase tracking-[3px]">
+          <span className="font-sans text-[18px] text-stone-600 uppercase tracking-[3px]">
             Dashboard
           </span>
         </div>
@@ -51,7 +60,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick links */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {quickLinks.map((link) => {
           const Icon = link.icon;
           return (
