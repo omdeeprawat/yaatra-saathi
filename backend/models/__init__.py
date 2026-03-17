@@ -3,3 +3,4 @@
 # reference other models by string name (e.g. relationship("Post")).
 from models.user import User
 from models.post import Post  
+from models.story import Story
