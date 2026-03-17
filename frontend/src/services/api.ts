@@ -214,3 +214,42 @@ export const mapApi = {
     return res.data;
   },
 };
+
+// story API
+
+export interface StoryTeaser {
+  id: number;
+  slug: string;
+  title: string;
+  category: string;
+  teaser: string;
+  cover_image_url: string | null;
+  read_time_minutes: number;
+  view_count: number;
+  is_featured: boolean;
+}
+
+export interface StoryDetail extends StoryTeaser {
+  full_content: string;
+  created_at: string;
+}
+
+export const storiesApi = {
+  getAllStories: async (
+    featuredOnly: boolean = false,
+  ): Promise<StoryTeaser[]> => {
+    const params = featuredOnly ? "?featured_only=true" : "";
+    const res = await apiClient.get<StoryTeaser[]>(`/stories${params}`);
+    return res.data;
+  },
+
+  getStoryBySlug: async (slug: string): Promise<StoryDetail> => {
+    const res = await apiClient.get<StoryDetail>(`/stories/${slug}`);
+    return res.data;
+  },
+
+  getStoryPreview: async (slug: string): Promise<StoryTeaser> => {
+    const res = await apiClient.get<StoryTeaser>(`/stories/preview/${slug}`);
+    return res.data;
+  },
+};

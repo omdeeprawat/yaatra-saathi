@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Mountain, Mail, Lock } from "lucide-react";
+import { Mountain, Mail } from "lucide-react";
 import { GoogleLogo as GoogleLogoIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/hooks/useAuth";
 import InputField from "@/components/ui/InputField";
@@ -20,7 +20,12 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect to where user was trying to go, or dashboard
-  const from = (location.state as { from?: string })?.from || "/dashboard";
+  const stateFrom = (location.state as { from?: string })?.from;
+  const queryReturn = new URLSearchParams(location.search).get("return");
+  const from =
+    (queryReturn && queryReturn.startsWith("/") ? queryReturn : undefined) ||
+    stateFrom ||
+    "/dashboard";
 
   const validate = () => {
     const errs: typeof errors = {};
