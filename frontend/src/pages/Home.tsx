@@ -14,6 +14,7 @@ import PostCard from "@/components/feed/PostCard";
 import PostCardSkeleton from "@/components/feed/PostCardSkeleton";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useRef } from "react";
+import StoriesSection from "@/components/stories/StoriesSection";
 
 function useFadeIn() {
   const ref = useRef<HTMLDivElement>(null);
@@ -230,8 +231,11 @@ export default function Home() {
           })}
         </div>
       </section>
+      
+      <StoriesSection/>
 
-      {/* ── Live Feed Preview ────────────────────────────────────────── */}
+
+      {/* Live Feed Preview */}
       <section
         ref={feedRef}
         className="max-w-3xl mx-auto px-4 py-16 opacity-0 translate-y-6 transition-all duration-700 ease-out"
@@ -276,7 +280,7 @@ export default function Home() {
         )}
       </section>
 
-      {/* ── CTA Banner ───────────────────────────────────────────────── */}
+      {/* CTA Banner */}
       <section
         ref={ctaRef}
         className="max-w-4xl mx-auto px-4 py-16 opacity-0 translate-y-6 transition-all duration-700 ease-out"
