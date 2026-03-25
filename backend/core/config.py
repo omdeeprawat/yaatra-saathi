@@ -23,14 +23,28 @@ class Settings(BaseSettings):
   CLOUDINARY_API_KEY: Optional[str] = None
   CLOUDINARY_API_SECRET: Optional[str] = None
 
+  AI_PROVIDER : str = 'groq'
+
+
   OPENAI_API_KEY: Optional[str] = None
+  GROQ_API_KEY: Optional[str] = None
 
   REFRESH_TOKEN_EXPIRE_DAYS: int = 30
   ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
 
+  CHROMA_DB_PATH: str = "./chroma_db"
+  CHROMA_COLLECTION: str = "yatra_knowledge"
+  RAG_CHUNK_SIZE: int = 800
+  RAG_CHUNK_OVERLAP: int = 150
+  RAG_TOP_K: int = 5
+
+  CHAT_MODEL: str = "llama-3.3-70b-versatile"
+  EMBED_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+
   class Config:
     env_file = ".env"
     case_sensitive = True
+    extra = "ignore"
 
 
 settings = Settings()
