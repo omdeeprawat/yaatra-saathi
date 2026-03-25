@@ -138,7 +138,8 @@ function App() {
                   background: "#0f0f16",
                   color: "#E0E0E0",
                   border: "1px solid #1e1e2a",
-                  fontFamily: "'Courier New', 'Courier', monospace",
+                  fontFamily:
+                    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                   fontSize: "14px",
                 },
                 success: {
