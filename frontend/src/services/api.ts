@@ -98,13 +98,13 @@ export const authApi = {
 export const postsApi = {
   getPosts: async (page = 1, size = 10): Promise<PaginatedResponse<Post>> => {
     const res = await apiClient.get<PaginatedResponse<Post>>(
-      `/posts?page=${page}&size=${size}`,
+      `/posts/?page=${page}&size=${size}`,
     );
     return res.data;
   },
 
   createPost: async (content: string, imageUrl?: string): Promise<Post> => {
-    const res = await apiClient.post<Post>("/posts", {
+    const res = await apiClient.post<Post>("/posts/", {
       content,
       image_url: imageUrl ?? null,
     });
@@ -172,9 +172,31 @@ export interface ChatStatusResponse {
   message: string;
 }
 
+export interface ChatIngestResponse {
+  success: boolean;
+  filename: string;
+  chunk_count: number;
+  message: string;
+}
+
 export const chatApi = {
   getStatus: async (): Promise<ChatStatusResponse> => {
     const res = await apiClient.get<ChatStatusResponse>("/chat/status");
+    return res.data;
+  },
+
+  uploadDocument: async (file: File): Promise<ChatIngestResponse> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await apiClient.post<ChatIngestResponse>(
+      "/chat/ingest-document",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 120000,
+      },
+    );
     return res.data;
   },
 
@@ -239,7 +261,7 @@ export const storiesApi = {
     featuredOnly: boolean = false,
   ): Promise<StoryTeaser[]> => {
     const params = featuredOnly ? "?featured_only=true" : "";
-    const res = await apiClient.get<StoryTeaser[]>(`/stories${params}`);
+    const res = await apiClient.get<StoryTeaser[]>(`/stories/${params}`);
     return res.data;
   },
 

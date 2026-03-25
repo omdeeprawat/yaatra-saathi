@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from core.config import settings
-from routers import health, auth, posts, upload, stories
+from routers import health, auth, posts, upload, stories, chat
 
 import models 
 
@@ -34,6 +34,7 @@ app.include_router(auth.router)
 app.include_router(posts.router)
 app.include_router(upload.router)
 app.include_router(stories.router)
+app.include_router(chat.router)
 
 @app.get("/")
 def root():
