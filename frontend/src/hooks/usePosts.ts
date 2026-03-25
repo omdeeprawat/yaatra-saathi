@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { postsApi } from "@/services/api";
 import toast from "react-hot-toast";
 
@@ -28,8 +29,12 @@ export function useCreatePost() {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
       toast.success("Post shared!");
     },
-    onError: () => {
-      toast.error("Failed to post. Please try again.");
+    onError: (error) => {
+      const message =
+        error instanceof AxiosError
+          ? (error.response?.data as { detail?: string } | undefined)?.detail
+          : "";
+      toast.error(message || "Failed to post. Please try again.");
     },
   });
 }
