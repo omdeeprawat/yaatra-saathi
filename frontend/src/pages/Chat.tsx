@@ -33,7 +33,7 @@ export default function Chat() {
     sendMessage(message, imageUrl);
   };
 
-  // ── Status gate ──────────────────────────────────────────────────────
+  //status gate 
   if (isCheckingStatus) {
     return (
       <div className="h-[calc(100vh-4rem)] flex items-center justify-center flex-col gap-3">
@@ -67,7 +67,7 @@ export default function Chat() {
     );
   }
 
-  // ── Main chat UI ─────────────────────────────────────────────────────
+  
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col max-w-3xl mx-auto">
 
@@ -104,12 +104,12 @@ export default function Chat() {
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
 
-        {/* Welcome screen when no messages */}
+        
         {!hasMessages && !isStreaming && (
           <ChatWelcome />
         )}
 
-        {/* Rendered messages */}
+        
         {messages.map(msg => (
           <ChatMessageBubble key={msg.id} message={msg} />
         ))}
@@ -131,7 +131,7 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested questions — only when no messages */}
+      
       {!hasMessages && (
         <SuggestedQuestions
           onSelect={q => handleSend(q)}
