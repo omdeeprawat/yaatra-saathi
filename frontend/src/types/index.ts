@@ -66,7 +66,7 @@ export interface YatraStop {
   latitude: number;
   longitude: number;
   altitude_meters: number;
-  distance_from_prev_km: number;
+  distance_from_previous_km: number;
   cumulative_km: number;
   description: string | null;
   significance: string | null;
