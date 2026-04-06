@@ -4,10 +4,10 @@ from db.database import Base
 class YatraStop(Base):
   __tablename__ = 'yatra_stops'
 
-  id = Column(Integer, primary_key=True, index=true)
+  id = Column(Integer, primary_key=True, index=True)
   name = Column(String(100), nullable=False)
   name_hindi = Column(String(100), nullable=True)
-  stage_number = Column(INteger, nullable=False)
+  stage_number = Column(Integer, nullable=False)
   latitude = Column(Float, nullable=False)
   longitude = Column(Float, nullable=False)
   altitude_meters = Column(Integer, nullable=False)
