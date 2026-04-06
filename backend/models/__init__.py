@@ -4,3 +4,4 @@
 from models.user import User
 from models.post import Post  
 from models.story import Story
+from models.stop import YatraStop
