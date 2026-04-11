@@ -4,6 +4,9 @@ import type {
   TokenResponse,
   LoginRequest,
   RegisterRequest,
+  RegisterOtpResponse,
+  VerifyOtpRequest,
+  VerifyOtpResponse,
   UpdateProfileRequest,
   User,
   PaginatedResponse,
@@ -58,8 +61,20 @@ apiClient.interceptors.response.use(
 // Auth API
 
 export const authApi = {
-  register: async (data: RegisterRequest): Promise<TokenResponse> => {
-    const res = await apiClient.post<TokenResponse>("/auth/register", data);
+  register: async (data: RegisterRequest): Promise<RegisterOtpResponse> => {
+    const res = await apiClient.post<RegisterOtpResponse>("/auth/register", data);
+    return res.data;
+  },
+
+  verifyOtp: async (data: VerifyOtpRequest): Promise<VerifyOtpResponse> => {
+    const res = await apiClient.post<VerifyOtpResponse>("/auth/verify-otp", data);
+    return res.data;
+  },
+
+  resendOtp: async (userId: number): Promise<VerifyOtpResponse> => {
+    const res = await apiClient.post<VerifyOtpResponse>("/auth/resend-otp", {
+      user_id: userId,
+    });
     return res.data;
   },
 
