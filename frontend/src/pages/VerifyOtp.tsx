@@ -19,14 +19,17 @@ export default function VerifyOtp() {
   const location = useLocation();
   const state = (location.state as VerifyState) || {};
 
-  const [userId, setUserId] = useState<string>(state.userId ? String(state.userId) : "");
+  const [userId, setUserId] = useState<string>(
+    state.userId ? String(state.userId) : "",
+  );
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
   const userIdNum = Number(userId);
 
-  const canSubmit = Number.isInteger(userIdNum) && userIdNum > 0 && otp.trim().length === 6;
+  const canSubmit =
+    Number.isInteger(userIdNum) && userIdNum > 0 && otp.trim().length === 6;
 
   const handleVerify = async (e: FormEvent) => {
     e.preventDefault();
@@ -93,9 +96,13 @@ export default function VerifyOtp() {
               Yatra <span className="text-saffron-500">Saathi</span>
             </span>
           </div>
-          <h1 className="font-display text-3xl text-stone-100 mb-2">Verify OTP</h1>
+          <h1 className="font-display text-3xl text-stone-100 mb-2">
+            Verify OTP
+          </h1>
           <p className="font-body text-stone-400">
-            {state.email ? `Enter the 6-digit code sent to ${state.email}` : "Enter the OTP sent to your email"}
+            {state.email
+              ? `Enter the 6-digit code sent to ${state.email}`
+              : "Enter the OTP sent to your email"}
           </p>
         </div>
 
@@ -114,7 +121,9 @@ export default function VerifyOtp() {
               type="text"
               placeholder="6-digit OTP"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) =>
+                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
               maxLength={6}
             />
 
