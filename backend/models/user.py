@@ -18,9 +18,12 @@ class User(Base):
   avatar_url = Column(String, nullable = True)
   auth_provider = Column(Enum(AuthProvider), default = AuthProvider.email)
   is_active = Column(Boolean, default= True)
-  is_verified = Column(Boolean, default= False)
   created_at = Column(DateTime(timezone = True), server_default=func.now())
   updated_at = Column(DateTime(timezone = True), onupdate= func.now())
-
+  is_verified = Column(Boolean, default= False, nullable=False)
+  verification_token = Column(String(6), nullable=True)
+  verification_expires =Column(DateTime, nullable=True) 
+  verification_attempts = Column(Integer, default=0)
+  verified_at = Column(DateTime, nullable=True)
   # relationships
   posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
