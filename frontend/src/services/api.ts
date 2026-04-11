@@ -62,12 +62,18 @@ apiClient.interceptors.response.use(
 
 export const authApi = {
   register: async (data: RegisterRequest): Promise<RegisterOtpResponse> => {
-    const res = await apiClient.post<RegisterOtpResponse>("/auth/register", data);
+    const res = await apiClient.post<RegisterOtpResponse>(
+      "/auth/register",
+      data,
+    );
     return res.data;
   },
 
   verifyOtp: async (data: VerifyOtpRequest): Promise<VerifyOtpResponse> => {
-    const res = await apiClient.post<VerifyOtpResponse>("/auth/verify-otp", data);
+    const res = await apiClient.post<VerifyOtpResponse>(
+      "/auth/verify-otp",
+      data,
+    );
     return res.data;
   },
 
