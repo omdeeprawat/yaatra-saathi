@@ -4,6 +4,16 @@ from models.user import User, AuthProvider
 from core.security import get_password_hash, verify_password
 from schemas.auth import RegisterRequest
 
+from core.config import settings
+import redis
+import secrets
+from datetime import datetime, timedelta
+from tasks.email_tasks import send_otp_email, send_welcome_email
+from db.database import SessionLocal
+
+
+redis_client = redis.from_url(settings.REDIS_URL)
+
 
 def get_user_by_email(db:Session, email : str) -> User | None:
   return db.query(User).filter(User.email == email).first()
@@ -97,3 +107,129 @@ def get_or_create_oauth_user(
   db.refresh(user)
 
   return user
+
+
+def generate_otp()->str:
+  return ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+
+
+def register_user_with_verification(email: str, password: str, full_name: str):
+  db = SessionLocal()
+  try:
+    existing = db.query(User).filter(User.email == email).first()
+    if existing:
+      if existing.is_verified:
+        raise ValueError("Email already registered")
+      else:
+        # resend otp for not verified 
+        otp = generate_otp()
+        existing.verification_token = otp
+        existing.verification_expires = datetime.utcnow() + timedelta(minutes=10)
+        existing.verification_attempts = 0
+        db.commit()
+        
+        send_otp_email.delay(email, existing.full_name, otp)
+        return {"user_id": existing.id, "message": "OTP resent"}
+      
+    # new unverified user
+    otp = generate_otp()
+    new_user = User(
+        email=email,
+      full_name=full_name,
+      hashed_password=get_password_hash(password),
+        is_verified=False,
+        verification_token=otp,
+        verification_expires=datetime.utcnow() + timedelta(minutes=10),
+        verification_attempts=0,
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Send OTP email asynchronously
+    send_otp_email.delay(email, full_name, otp)
+    
+    return {
+      "user_id": new_user.id,
+      "message": "Registration successful. Please check your email for OTP."
+    }
+  
+  finally:
+    db.close()
+
+
+def verify_otp(user_id: int, otp: str):
+  """Verify OTP and activate user"""
+  db = SessionLocal()
+  try:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+      raise ValueError("User not found")
+    
+    if user.is_verified:
+      raise ValueError("Email already verified")
+    
+    # Check if OTP expired
+    if datetime.utcnow() > user.verification_expires:
+      raise ValueError("OTP expired. Please request a new one.")
+    
+    # Check max attempts
+    if user.verification_attempts >= 3:
+      raise ValueError("Too many failed attempts. Please request a new OTP.")
+    
+    # Verify OTP
+    if user.verification_token != otp:
+      user.verification_attempts += 1
+      db.commit()
+      raise ValueError(f"Invalid OTP. {3 - user.verification_attempts} attempts remaining.")
+    
+    
+    user.is_verified = True
+    user.verified_at = datetime.utcnow()
+    user.verification_token = None
+    user.verification_expires = None
+    db.commit()
+    
+    
+    send_welcome_email.delay(user.email, user.full_name)
+    
+    return {"success": True, "message": "Email verified successfully!"}
+
+  finally:
+    db.close()
+
+
+def resend_otp(user_id: int):
+  """Resend OTP with rate limiting"""
+  # rate limiting check using Redis
+  rate_limit_key = f"otp_resend:{user_id}"
+  if redis_client.exists(rate_limit_key):
+    raise ValueError("Please wait 1 minute before requesting a new OTP")
+  
+  db = SessionLocal()
+  try:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+      raise ValueError("User not found")
+    
+    if user.is_verified:
+      raise ValueError("Email already verified")
+    
+    # Generate new OTP
+    otp = generate_otp()
+    user.verification_token = otp
+    user.verification_expires = datetime.utcnow() + timedelta(minutes=10)
+    user.verification_attempts = 0
+    db.commit()
+    
+    
+    send_otp_email.delay(user.email, user.full_name, otp)
+    
+    # rate limit (1 minute)
+    redis_client.setex(rate_limit_key, 60, "1")
+    
+    return {"success": True, "message": "OTP resent successfully"}
+
+  finally:
+    db.close()
