@@ -9,6 +9,7 @@ import SuggestedQuestions from '@/components/chat/SuggestedQuestions';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatWelcome from '@/components/chat/ChatWelcome';
 import Spinner from '@/components/ui/Spinner';
+import AppShell from '@/components/layout/AppShell';
 
 export default function Chat() {
   const { messages, isStreaming, streamingContent, error, sendMessage, clearMessages } = useChat();
@@ -36,40 +37,45 @@ export default function Chat() {
   //status gate 
   if (isCheckingStatus) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center flex-col gap-3">
-        <Spinner size="large" />
-        <p className="font-sans text-stone-400 text-sm">Checking AI guide status...</p>
-      </div>
+      <AppShell title="AI Guide" subtitle="RAG assistant · live">
+        <div className="h-[calc(100vh-16rem)] flex items-center justify-center flex-col gap-3">
+          <Spinner size="large" />
+          <p className="font-sans text-stone-400 text-sm">Checking AI guide status...</p>
+        </div>
+      </AppShell>
     );
   }
 
   if (!chatStatus?.ready) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-        <div className="card border-amber-500/20 bg-amber-500/5 max-w-md text-center">
-          <WifiOff className="w-10 h-10 text-amber-400 mx-auto mb-4" />
-          <h2 className="font-sans font-semibold text-stone-200 mb-2">
-            AI Guide Not Ready
-          </h2>
-          <p className="font-body text-stone-400 text-sm leading-relaxed mb-4">
-            The knowledge base has not been indexed yet. Run the ingestion pipeline first:
-          </p>
-          <code className="block bg-mountain-900 rounded-lg px-4 py-3 font-mono
-                           text-xs text-saffron-300 text-left">
-            cd backend<br />
-            python -m rag.ingest
-          </code>
-          <p className="font-sans text-xs text-stone-500 mt-3">
-            Then restart the server and refresh this page.
-          </p>
+      <AppShell title="AI Guide" subtitle="RAG assistant · live">
+        <div className="h-[calc(100vh-16rem)] flex items-center justify-center px-4">
+          <div className="card border-amber-500/20 bg-amber-500/5 max-w-md text-center">
+            <WifiOff className="w-10 h-10 text-amber-400 mx-auto mb-4" />
+            <h2 className="font-sans font-semibold text-stone-200 mb-2">
+              AI Guide Not Ready
+            </h2>
+            <p className="font-body text-stone-400 text-sm leading-relaxed mb-4">
+              The knowledge base has not been indexed yet. Run the ingestion pipeline first:
+            </p>
+            <code className="block bg-mountain-900 rounded-lg px-4 py-3 font-mono
+                             text-xs text-saffron-300 text-left">
+              cd backend<br />
+              python -m rag.ingest
+            </code>
+            <p className="font-sans text-xs text-stone-500 mt-3">
+              Then restart the server and refresh this page.
+            </p>
+          </div>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col max-w-3xl mx-auto">
+    <AppShell title="AI Guide" subtitle="RAG assistant · live">
+      <div className="h-[calc(100vh-12.5rem)] flex flex-col max-w-3xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3
@@ -141,6 +147,7 @@ export default function Chat() {
 
       {/* Input */}
       <ChatInput onSend={handleSend} isStreaming={isStreaming} />
-    </div>
+      </div>
+    </AppShell>
   );
 }
