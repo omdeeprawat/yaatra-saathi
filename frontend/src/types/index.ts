@@ -7,6 +7,7 @@ export interface User {
   avatar_url: string | null;
   is_active: boolean;
   auth_provider: "email" | "google";
+  role: "user" | "admin";
 }
 
 export interface AuthState {
