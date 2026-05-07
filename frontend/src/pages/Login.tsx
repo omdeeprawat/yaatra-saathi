@@ -61,7 +61,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-saffron-500/5 blur-3xl" />
@@ -79,7 +79,7 @@ export default function Login() {
               />
             </div>
             <span className="font-display text-2xl font-bold text-stone-100">
-              Yatra <span className="text-saffron-500">Saathi</span>
+              Yaatra <span className="text-saffron-500">Saathi</span>
             </span>
           </div>
           <h1 className="font-display text-3xl text-stone-100 mb-2">
@@ -91,13 +91,13 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <div className="card border-mountain-600/50">
+        <div className="card cyber-panel border-mountain-600/50">
           {/* Google OAuth button */}
           <button
             onClick={googleLogin}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded
-                       border border-mountain-500/50 hover:border-mountain-400
-                       bg-mountain-800/50 hover:bg-mountain-700/50
+                       border border-mountain-500/60 hover:border-saffron-500/60
+                       bg-mountain-800/60 hover:bg-mountain-700/70
                        text-stone-200 font-sans text-sm font-medium
                        transition-all duration-200 mb-6"
           >
@@ -141,7 +141,7 @@ export default function Login() {
                 autoComplete="current-password"
               />
               <div className="text-right">
-                <span className="font-sans text-xs text-saffron-400 hover:text-saffron-300 cursor-pointer">
+                <span className="font-sans text-xs text-saffron-300 hover:text-saffron-200 cursor-pointer">
                   Forgot password?
                 </span>
               </div>
