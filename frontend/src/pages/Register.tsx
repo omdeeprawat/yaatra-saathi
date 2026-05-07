@@ -85,7 +85,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-saffron-500/10 blur-3xl" />
@@ -113,13 +113,13 @@ export default function Register() {
         </div>
 
         {/* Card */}
-        <div className="card border-mountain-600/50">
+        <div className="card cyber-panel border-mountain-600/50">
           {/* Google OAuth */}
           <button
             onClick={googleLogin}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded
-                       border border-mountain-500/50 hover:border-mountain-400
-                       bg-mountain-800/50 hover:bg-mountain-700/50
+                       border border-mountain-500/60 hover:border-saffron-500/60
+                       bg-mountain-800/60 hover:bg-mountain-700/70
                        text-stone-200 font-sans text-sm font-medium
                        transition-all duration-200 mb-6"
           >
