@@ -1,26 +1,31 @@
 import json
+import logging
 from pathlib import Path
+import time
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from core.dependencies import get_current_user
-from rag.ingest import ingest
-from rag.rag_service import stream_rag_response
-from rag.vector_store import collection_exists_and_has_docs, get_collection_count
+from pydantic import BaseModel, Field
 from models.user import User
+from core.dependencies import get_current_user
+from core.rate_limiter import chat_rate_limiter
+from rag.ingest import ingest_documents
+from rag.vector_store import collection_exists_and_has_docs, get_collection_count
+from rag.rag_service_multiagent import stream_rag_response_multiagent
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+logger = logging.getLogger(__name__)
 
 
 class ChatMessage(BaseModel):
-    role: str   
+    role: str
     content: str
 
 
 class ChatRequest(BaseModel):
     message: str
-    history: list[ChatMessage] = []
+    history: list[ChatMessage] = Field(default_factory=list)
     image_url: str | None = None
 
 
@@ -43,90 +48,82 @@ MAX_DOC_SIZE_BYTES = MAX_DOC_SIZE_MB * 1024 * 1024
 DOCUMENTS_DIR = Path(__file__).resolve().parent.parent / "rag" / "documents"
 
 
+def _sse(payload: dict[str, str] | str) -> str:
+    if isinstance(payload, str):
+        return f"data: {payload}\n\n"
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+
 @router.get("/status", response_model=ChatStatusResponse)
-def chat_status(_current_user: User = Depends(get_current_user)):
+async def chat_status(_current_user: User = Depends(get_current_user)):
     """Check whether the RAG vector store is populated and ready."""
     ready = collection_exists_and_has_docs()
     count = get_collection_count()
+    logger.info("[ChatStatus] ready=%s chunk_count=%s", ready, count)
     return ChatStatusResponse(
         ready=ready,
         chunk_count=count,
-        message="Ready" if ready else "Vector store is empty. Run: python -m rag.ingest",
+        message="Ready" if ready else "Vector store is empty. Run: python -m rag.ingest --force",
     )
 
 
 @router.post("/stream")
-async def chat_stream(
+async def stream_chat_multiagent(
     request: ChatRequest,
     current_user: User = Depends(get_current_user),
 ):
     """
-    Streaming RAG chat endpoint.
-    Returns a Server-Sent Events (SSE) stream.
-
-    Frontend reads this with EventSource or fetch + ReadableStream.
-    Each event is: data: <text_chunk>\n\n
-    The stream ends with: data: [DONE]\n\n
+    Streaming multi-agent chat endpoint.
+    Returns SSE events in the expected frontend format.
     """
+    request_id = str(uuid4())
+    started_at = time.perf_counter()
+
+    await chat_rate_limiter.check_rate_limit(current_user.id)
+    logger.info("[ChatStream:%s] started user_id=%s", request_id, current_user.id)
+
     history = [{"role": m.role, "content": m.content} for m in request.history]
 
     async def event_stream():
         try:
-            async for chunk in stream_rag_response(
+            async for chunk in stream_rag_response_multiagent(
                 user_message=request.message,
                 chat_history=history,
                 image_url=request.image_url,
+                request_id=request_id,
             ):
-                # SSE format: data: <payload>\n\n
-                yield f"data: {json.dumps({'text': chunk})}\n\n"
-        except Exception as e:
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                yield _sse({"text": chunk})
+        except Exception as exc:
+            logger.exception("[ChatStream:%s] stream_error=%s", request_id, str(exc))
+            yield _sse({"error": str(exc)})
         finally:
-            yield "data: [DONE]\n\n"
+            elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+            logger.info("[ChatStream:%s] completed elapsed_ms=%s", request_id, elapsed_ms)
+            yield _sse("[DONE]")
 
     return StreamingResponse(
         event_stream(),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",  
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
         },
     )
-
-
-@router.post("/")
-async def chat_simple(
-    request: ChatRequest,
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Non-streaming endpoint — returns the full response at once.
-    Useful for testing in /docs without needing an SSE client.
-    """
-    history = [{"role": m.role, "content": m.content} for m in request.history]
-    full_response = ""
-
-    async for chunk in stream_rag_response(
-        user_message=request.message,
-        chat_history=history,
-        image_url=request.image_url,
-    ):
-        full_response += chunk
-
-    return {"response": full_response, "message": request.message}
 
 
 @router.post("/ingest-document", response_model=ChatIngestResponse)
 async def ingest_document(
     file: UploadFile = File(...),
-    _current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    """
-    Upload a new knowledge document (.txt/.md/.pdf) and rebuild the vector index.
-    """
+    """Upload a knowledge document and rebuild vector index."""
+    request_id = str(uuid4())
+    await chat_rate_limiter.check_rate_limit(current_user.id)
+    logger.info("[ChatIngest:%s] started user_id=%s filename=%s", request_id, current_user.id, file.filename)
+
     filename = file.filename or "document"
     suffix = Path(filename).suffix.lower()
-
     if suffix not in ALLOWED_DOC_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -152,12 +149,15 @@ async def ingest_document(
     save_path.write_bytes(contents)
 
     try:
-        ingest(force=True)
-    except Exception as e:
+        ingest_documents(force=True)
+    except Exception as exc:
+        logger.exception("[ChatIngest:%s] ingestion_failed=%s", request_id, str(exc))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ingestion failed: {str(e)}",
+            detail=f"Ingestion failed: {str(exc)}",
         )
+
+    logger.info("[ChatIngest:%s] completed chunk_count=%s", request_id, get_collection_count())
 
     return ChatIngestResponse(
         success=True,

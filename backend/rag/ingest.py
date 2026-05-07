@@ -2,7 +2,8 @@
 import os
 import sys
 import time
-
+from typing import List
+import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -17,132 +18,177 @@ from langchain_core.documents import Document
 from rag.vector_store import get_vector_store, get_chroma_client, get_collection_count
 from core.config import settings
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'   
+)
+logger = logging.getLogger(__name__)
+
+
 DOCUMENTS_DIR = Path(__file__).parent / "documents"
 
-LOADER_MAP = {
-    ".txt": TextLoader,
-    ".md":  UnstructuredMarkdownLoader,
-    ".pdf": PyPDFLoader,
-}
+# LOADER_MAP = {
+#     ".txt": TextLoader,
+#     ".md":  UnstructuredMarkdownLoader,
+#     ".pdf": PyPDFLoader,
+# }
 
 
-def load_documents() -> list[Document]:
+def load_documents(docs_path:Path) -> List:
     """Load all supported documents from the documents/ directory."""
-    docs: list[Document] = []
+    logger.info(f"[1/3] Loading documents from {docs_path} ...")
+    documents = []
+    supported_extensions = {'.txt': TextLoader, '.pdf': PyPDFLoader, '.md': UnstructuredMarkdownLoader}
 
-    if not DOCUMENTS_DIR.exists():
-        print(f"[ERROR] Documents directory not found: {DOCUMENTS_DIR}")
-        sys.exit(1)
-
-    files = list(DOCUMENTS_DIR.iterdir())
-    if not files:
-        print("[ERROR] No files found in rag/documents/")
-        sys.exit(1)
-
-    for file_path in sorted(files):
-        suffix = file_path.suffix.lower()
-        if suffix not in LOADER_MAP:
-            print(f"  [SKIP] Unsupported format: {file_path.name}")
-            continue
-
-        try:
-            loader_cls = LOADER_MAP[suffix]
-            loader = loader_cls(str(file_path))
-            file_docs = loader.load()
-
-            # Tagging each chunk with its source filename
-            for doc in file_docs:
-                doc.metadata["source"] = file_path.name
-                doc.metadata["file_type"] = suffix.lstrip(".")
-
-            docs.extend(file_docs)
-            print(f"  [OK]   Loaded {len(file_docs)} page(s) from {file_path.name}")
-        except Exception as e:
-            print(f"  [FAIL] Could not load {file_path.name}: {e}")
-
-    return docs
+    if not docs_path.exists():
+        raise FileNotFoundError(f'documents directory not found: {docs_path}')
 
 
-def split_documents(docs: list[Document]) -> list[Document]:
+    file_count = 0
+    for file_path in docs_path.glob('*'):
+        if file_path.suffix.lower() in supported_extensions:
+            try:
+                loader_class = supported_extensions[file_path.suffix.lower()]
+                loader = loader_class(str(file_path))
+                docs = loader.load()
+
+                for doc in docs:
+                    doc.metadata["source"] = file_path.name
+                    doc.metadata["file_path"] = str(file_path)
+                
+                documents.extend(docs)
+                file_count += 1
+                logger.info(f"  ✓ Loaded {file_path.name} ({len(docs)} page(s))")
+
+            except Exception as e:
+                logger.error(f"  ✗ Failed to load {file_path.name}: {str(e)}")
+    
+    logger.info(f"Found {file_count} documents, total {len(documents)} pages")
+    return documents
+
+
+def split_documents(documents: List) -> List:
     """Split documents into overlapping chunks for embedding."""
-    splitter = RecursiveCharacterTextSplitter(
+    logger.info(f"[2/3] Splitting into chunks ...")
+    text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=settings.RAG_CHUNK_SIZE,
         chunk_overlap=settings.RAG_CHUNK_OVERLAP,
-        separators=["\n\n", "\n", ". ", "? ", "! ", " ", ""],
         length_function=len,
     )
-
-    chunks = splitter.split_documents(docs)
-    print(f"\n  Split into {len(chunks)} chunks "
-          f"(size={settings.RAG_CHUNK_SIZE}, overlap={settings.RAG_CHUNK_OVERLAP})")
+    
+    chunks = text_splitter.split_documents(documents)
+    logger.info(f"Created {len(chunks)} chunks")
+    
     return chunks
 
 
-def ingest(force: bool = False) -> None:
+def store_in_vector_db(chunks: List, force: bool = False):
     """
-    Main ingestion pipeline.
-    Set force=True to wipe the existing collection and re-ingest.
-    """
-    print("\n" + "=" * 60)
-    print("  YATRA SAATHI — RAG INGESTION PIPELINE")
-    print("=" * 60)
-
+    Store chunks in ChromaDB vector store.
     
-    if force:
-        print("\n[FORCE] Deleting existing collection...")
+    Args:
+        chunks: Document chunks to store
+        force: If True, delete existing collection and recreate
+    """
+    logger.info(f"[3/3] Generating embeddings and storing in ChromaDB ...")
+    
+    # Check if collection exists
+    exists = collection_exists_and_has_docs()
+    
+    if exists and not force:
+        logger.warning("Collection already exists with documents. Use --force to re-ingest.")
+        return {"status": "skipped", "chunk_count": 0}
+    
+    if force and exists:
+        logger.info("Force flag set. Deleting existing collection...")
+        client = get_chroma_client()
         try:
-            client = get_chroma_client()
             client.delete_collection(settings.CHROMA_COLLECTION)
-            print("  [OK] Collection deleted.")
-        except Exception:
-            print("  [OK] No existing collection to delete.")
-
-    # Check if already ingested 
-    current_count = get_collection_count()
-    if current_count > 0 and not force:
-        print(f"\n[INFO] Vector store already has {current_count} chunks.")
-        print("  Run with force=True to re-ingest: python -m rag.ingest --force")
-        print("  Skipping ingestion.\n")
-        return
-
-    # Load 
-    print(f"\n[1/3] Loading documents from {DOCUMENTS_DIR} ...")
-    docs = load_documents()
-    print(f"  Total pages loaded: {len(docs)}")
-
-    # Split 
-    print("\n[2/3] Splitting into chunks ...")
-    chunks = split_documents(docs)
-
-    # Embed and store
-    print(f"\n[3/3] Generating embeddings and storing in ChromaDB ...")
-    print(f"  Model: {settings.EMBED_MODEL}")
-    print(f"  Target path: {settings.CHROMA_DB_PATH}")
-    print(f"  Collection: {settings.CHROMA_COLLECTION}")
-    print(f"  Chunks to embed: {len(chunks)}")
-    print("  (This may take 30–60 seconds depending on document size)")
-
-    start = time.time()
+            logger.info("  ✓ Existing collection deleted")
+        except Exception as e:
+            logger.warning(f"  ! Could not delete collection: {str(e)}")
+    
+    # Store chunks
     vector_store = get_vector_store()
+    
+    try:
+        # Add documents in batches to avoid memory issues
+        batch_size = 50
+        for i in range(0, len(chunks), batch_size):
+            batch = chunks[i:i+batch_size]
+            vector_store.add_documents(batch)
+            logger.info(f"  ✓ Stored batch {i//batch_size + 1} ({len(batch)} chunks)")
+        
+        logger.info(f"✓ Ingestion complete")
+        logger.info(f"✓ {len(chunks)} chunks stored in ChromaDB")
+        
+        return {"status": "success", "chunk_count": len(chunks)}
+    
+    except Exception as e:
+        logger.error(f"✗ Failed to store in vector DB: {str(e)}")
+        raise
 
-    # Add in batches of 50 to avoid rate limits
-    batch_size = 50
-    for i in range(0, len(chunks), batch_size):
-        batch = chunks[i : i + batch_size]
-        vector_store.add_documents(batch)
-        print(f"  Embedded {min(i + batch_size, len(chunks))}/{len(chunks)} chunks...")
-        time.sleep(0.5)  
-
-    elapsed = time.time() - start
-    final_count = get_collection_count()
-
-    print(f"\n{'=' * 60}")
-    print(f"  ✓ Ingestion complete in {elapsed:.1f}s")
-    print(f"  ✓ {final_count} chunks stored in ChromaDB")
-    print(f"  ✓ Vector store ready at: {settings.CHROMA_DB_PATH}")
-    print(f"{'=' * 60}\n")
 
 
+def ingest_documents(force: bool = False) -> dict:
+    """
+    Main ingestion function.
+    
+    Args:
+        force: If True, re-ingest even if collection exists
+    
+    Returns:
+        dict with status and chunk count
+    """
+    try:
+        docs_path = Path(__file__).parent / "documents"
+        
+        # Load documents
+        documents = load_documents(docs_path)
+        
+        if not documents:
+            logger.warning("No documents found to ingest!")
+            return {"status": "no_documents", "chunk_count": 0}
+        
+        # Split into chunks
+        chunks = split_documents(documents)
+        
+        # Store in vector DB
+        result = store_in_vector_db(chunks, force=force)
+        
+        return result
+    
+    except Exception as e:
+        logger.error(f"Ingestion failed: {str(e)}", exc_info=True)
+        raise
+ 
+ 
 if __name__ == "__main__":
-    force_flag = "--force" in sys.argv
-    ingest(force=force_flag)
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Ingest documents into vector store")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force re-ingestion even if collection exists"
+    )
+    
+    args = parser.parse_args()
+    
+    try:
+        result = ingest_documents(force=args.force)
+        
+        if result["status"] == "success":
+            logger.info(f"✓ Successfully ingested {result['chunk_count']} chunks")
+            sys.exit(0)
+        elif result["status"] == "skipped":
+            logger.info("✓ Ingestion skipped (collection exists). Use --force to re-ingest.")
+            sys.exit(0)
+        else:
+            logger.warning(f"⚠ Ingestion completed with status: {result['status']}")
+            sys.exit(0)
+    
+    except Exception as e:
+        logger.error(f"✗ Ingestion failed: {str(e)}")
+        sys.exit(1)
