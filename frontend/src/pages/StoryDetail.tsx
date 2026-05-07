@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { storiesApi } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import Spinner from '@/components/ui/Spinner';
+import AppShell from '@/components/layout/AppShell';
 
 const CATEGORY_COLORS: Record<string, string> = {
   mythology: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
@@ -32,28 +33,33 @@ export default function StoryDetail() {
 
   if (isLoading || authLoading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <Spinner size="large" />
-      </div>
+      <AppShell title="Stories" subtitle="Sacred narratives and culture">
+        <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center">
+          <Spinner size="large" />
+        </div>
+      </AppShell>
     );
   }
 
   if (isError || !story) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-        <div className="card border-red-500/20 bg-red-500/5 max-w-md text-center">
-          <p className="font-sans text-red-400 text-sm">
-            Story not found or you don't have access to view it.
-          </p>
+      <AppShell title="Stories" subtitle="Sacred narratives and culture">
+        <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center px-4">
+          <div className="card border-red-500/20 bg-red-500/5 max-w-md text-center">
+            <p className="font-sans text-red-400 text-sm">
+              Story not found or you don't have access to view it.
+            </p>
+          </div>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   const categoryStyle = CATEGORY_COLORS[story.category] || CATEGORY_COLORS.cultural;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)]">
+    <AppShell title="Stories" subtitle="Sacred narratives and culture" contentClassName="px-0 pb-0">
+      <div>
 
       {/* Hero section */}
       <div className="relative bg-gradient-to-b from-mountain-900 to-mountain-950 px-4 py-12 mb-8">
@@ -128,6 +134,7 @@ export default function StoryDetail() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }

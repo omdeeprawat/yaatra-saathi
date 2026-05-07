@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.stop import StopResponse
+from models.stop import YatraStop
 from db.database import get_db
 from sqlalchemy.orm import Session
 
