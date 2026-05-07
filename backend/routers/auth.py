@@ -9,6 +9,7 @@ from schemas.auth import UserResponse, TokenResponse, RegisterRequest, LoginRequ
 from db.database import get_db
 from core.security import create_access_token, create_refresh_token, decode_refresh_token
 from core.dependencies import get_current_user, get_user_by_id
+from core.rate_limiter import otp_resend_limiter
 from models.user import User, AuthProvider
 
 from typing import Optional
@@ -88,13 +89,14 @@ def verify_email(data:VerifyOTPRequest):
 
 
 @router.post("/resend-otp")
-def resend_otp_code(data: ResendOTPRequest):
+async def resend_otp_code(data: ResendOTPRequest):
   """Resend OTP (rate limited to 1/minute)"""
   try:
+    await otp_resend_limiter.check_rate_limit(data.user_id)
     result = resend_otp(user_id=data.user_id)
     return result
   except ValueError as e:
-    raise HTTPException(status_code=400, detail=str(e))
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
   
 # -----------------> token based login function
@@ -115,13 +117,14 @@ def login(data:LoginRequest, response: Response, db: Session = Depends(get_db)):
   if not user.is_verified:
     raise HTTPException(
       status_code=status.HTTP_403_FORBIDDEN,
-      detail = 'email not verified.check your email for otp'
+      detail = 'email not verified. please check your email for otp'
     )
 
   access_token = create_access_token({"sub": str(user.id)})
   refresh_token = create_refresh_token({"sub": str(user.id)})
   set_refresh_cookie(response, refresh_token)
   return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
+
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(response: Response, db :Session = Depends(get_db), refresh_token: Optional[str] = Cookie(default=None)):
@@ -161,7 +164,7 @@ def update_profile(
 def logout(response : Response):
   response.delete_cookie("refresh_token")
   return {
-    "message" : "logged out successful"
+    "message" : "logged out successfully"
   }
 
   
