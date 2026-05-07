@@ -9,6 +9,7 @@ import Layout from "@/components/layout/Layout";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import VerifyOtp from "@/pages/VerifyOtp";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/Dashboard";
 import Spinner from "@/components/ui/Spinner";
@@ -20,6 +21,9 @@ import Feed from "@/pages/Feed";
 import Profile from "@/pages/Profile";
 import StoryDetail from "./pages/StoryDetail";
 import Stories from "@/pages/Stories";
+import Admin from "@/pages/Admin";
+
+import "leaflet/dist/leaflet.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +67,24 @@ function GuestRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return user?.role === "admin" ? <>{children}</> : <Navigate to="/dashboard" replace />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -94,6 +116,14 @@ function App() {
                     </GuestRoute>
                   }
                 />
+                <Route
+                  path="/verify-otp"
+                  element={
+                    <GuestRoute>
+                      <VerifyOtp />
+                    </GuestRoute>
+                  }
+                />
 
                 {/* OAuth callback */}
                 <Route path="/auth/callback" element={<AuthCallback />} />
@@ -121,6 +151,14 @@ function App() {
                     <ProtectedRoute>
                       <Profile />
                     </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <Admin />
+                    </AdminRoute>
                   }
                 />
 
