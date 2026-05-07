@@ -43,7 +43,9 @@ export default function ElevationProfile({
   onSelect,
 }: ElevationProfileProps) {
   const { data: stops = [], isLoading } = useStops();
-  const sorted = [...(stops || [])].sort((a: YatraStop, b: YatraStop) => a.stage_number - b.stage_number);
+  const sorted = [...(stops || [])].sort(
+    (a: YatraStop, b: YatraStop) => a.stage_number - b.stage_number,
+  );
 
   if (isLoading) {
     return (
@@ -58,10 +60,14 @@ export default function ElevationProfile({
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white px-6 py-4">
       <div className="mb-3">
-        <h3 className="font-semibold text-gray-900 text-sm">Elevation Profile</h3>
-        <p className="text-xs text-gray-600">Click on the chart to select a stop</p>
+        <h3 className="font-semibold text-gray-900 text-sm">
+          Elevation Profile
+        </h3>
+        <p className="text-xs text-gray-600">
+          Click on the chart to select a stop
+        </p>
       </div>
-      
+
       <ResponsiveContainer width="100%" height={160}>
         <AreaChart
           data={sorted}
@@ -101,7 +107,10 @@ export default function ElevationProfile({
             tickFormatter={(v) => `${(v / 1000).toFixed(1)}k`}
             width={35}
           />
-          <Tooltip cursor={{ fill: 'rgba(249, 115, 22, 0.1)' }} content={<CustomTooltip />} />
+          <Tooltip
+            cursor={{ fill: "rgba(249, 115, 22, 0.1)" }}
+            content={<CustomTooltip />}
+          />
 
           {selectedStop && (
             <ReferenceLine
@@ -132,21 +141,36 @@ export default function ElevationProfile({
       {/* Summary stats */}
       <div className="mt-4 grid grid-cols-4 gap-4">
         <div className="text-center">
-          <p className="text-xs text-gray-600 uppercase tracking-wider">Total Distance</p>
-          <p className="text-lg font-semibold text-gray-900">{sorted[sorted.length - 1]?.cumulative_km || 0}km</p>
+          <p className="text-xs text-gray-600 uppercase tracking-wider">
+            Total Distance
+          </p>
+          <p className="text-lg font-semibold text-gray-900">
+            {sorted[sorted.length - 1]?.cumulative_km || 0}km
+          </p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-gray-600 uppercase tracking-wider">Max Altitude</p>
-          <p className="text-lg font-semibold text-gray-900">{Math.max(...sorted.map(s => s.altitude_meters)).toLocaleString()}m</p>
+          <p className="text-xs text-gray-600 uppercase tracking-wider">
+            Max Altitude
+          </p>
+          <p className="text-lg font-semibold text-gray-900">
+            {Math.max(...sorted.map((s) => s.altitude_meters)).toLocaleString()}
+            m
+          </p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-gray-600 uppercase tracking-wider">Stops</p>
+          <p className="text-xs text-gray-600 uppercase tracking-wider">
+            Stops
+          </p>
           <p className="text-lg font-semibold text-gray-900">{sorted.length}</p>
         </div>
         {selectedStop && (
           <div className="text-center">
-            <p className="text-xs text-gray-600 uppercase tracking-wider">Selected</p>
-            <p className="text-lg font-semibold text-saffron-600">{selectedStop.name}</p>
+            <p className="text-xs text-gray-600 uppercase tracking-wider">
+              Selected
+            </p>
+            <p className="text-lg font-semibold text-saffron-600">
+              {selectedStop.name}
+            </p>
           </div>
         )}
       </div>
