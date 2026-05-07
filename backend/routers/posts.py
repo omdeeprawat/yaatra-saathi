@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from db.database import get_db
 from core.dependencies import get_current_user, get_optional_user
+from core.rate_limiter import post_creation_limiter
 from schemas.post import PostCreate, PostResponse, PaginatedPosts
 from services.post_service import get_posts_paginated, create_post, delete_post
 from models.user import User
@@ -25,12 +26,13 @@ def list_posts(
 
 
 @router.post("/", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
-def create_new_post(
+async def create_new_post(
   data: PostCreate,
   db: Session = Depends(get_db),
   current_user: User = Depends(get_current_user)
 ):
   """Authenticated — create a new post."""
+  await post_creation_limiter.check_rate_limit(current_user.id)
   return create_post(db, data, author_id=current_user.id)
 
 
