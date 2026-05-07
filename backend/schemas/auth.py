@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, field_validator
+from models.user import AuthProvider, UserRole
 
 class RegisterRequest(BaseModel):
   email: EmailStr
@@ -47,7 +48,8 @@ class UserResponse(BaseModel):
   full_name : str
   avatar_url : str | None
   is_active : bool
-  auth_provider : str
+  auth_provider : AuthProvider
+  role: UserRole
 
   class Config:
     from_attributes = True
