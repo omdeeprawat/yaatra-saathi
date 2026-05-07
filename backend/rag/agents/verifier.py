@@ -1,4 +1,4 @@
-groq import AsyncGroq
+from groq import AsyncGroq
 from core.config import settings
 import json
 import logging
