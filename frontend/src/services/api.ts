@@ -139,9 +139,29 @@ export const postsApi = {
 
 // Health API
 
+export interface HealthReadinessChecks {
+  database: boolean;
+  redis: boolean;
+  vector_store: boolean;
+  groq_key_configured: boolean;
+  vector_chunk_count: number;
+}
+
+export interface HealthReadinessResponse {
+  status: "ready" | "not_ready";
+  checks: HealthReadinessChecks;
+}
+
 export const healthApi = {
   check: async () => {
     const res = await apiClient.get("/health");
+    return res.data;
+  },
+
+  ready: async (): Promise<HealthReadinessResponse> => {
+    const res = await apiClient.get<HealthReadinessResponse>("/health/ready", {
+      validateStatus: () => true,
+    });
     return res.data;
   },
 };
@@ -200,6 +220,30 @@ export interface ChatIngestResponse {
   message: string;
 }
 
+export interface AdminIngestionStatusResponse {
+  status: string;
+  chunk_count: number;
+  message: string;
+}
+
+export interface AdminDocumentInfo {
+  filename: string;
+  size: number;
+  extension: string;
+}
+
+export interface AdminDocumentListResponse {
+  documents: AdminDocumentInfo[];
+  total: number;
+}
+
+export interface AdminIngestTriggerResponse {
+  success: boolean;
+  message: string;
+  task_id: string;
+  force: boolean;
+}
+
 export const chatApi = {
   getStatus: async (): Promise<ChatStatusResponse> => {
     const res = await apiClient.get<ChatStatusResponse>("/chat/status");
@@ -238,6 +282,68 @@ export const chatApi = {
       },
       body: JSON.stringify(request),
     });
+  },
+};
+
+// Admin API
+
+export const adminApi = {
+  uploadDocument: async (
+    file: File,
+  ): Promise<{
+    success: boolean;
+    filename: string;
+    size: number;
+    message: string;
+  }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await apiClient.post<{
+      success: boolean;
+      filename: string;
+      size: number;
+      message: string;
+    }>("/admin/upload-document", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 120000,
+    });
+    return res.data;
+  },
+
+  triggerIngestion: async (
+    force = false,
+  ): Promise<AdminIngestTriggerResponse> => {
+    const res = await apiClient.post<AdminIngestTriggerResponse>(
+      "/admin/ingest",
+      { force },
+    );
+    return res.data;
+  },
+
+  getIngestionStatus: async (): Promise<AdminIngestionStatusResponse> => {
+    const res = await apiClient.get<AdminIngestionStatusResponse>(
+      "/admin/ingestion-status",
+    );
+    return res.data;
+  },
+
+  listDocuments: async (): Promise<AdminDocumentListResponse> => {
+    const res =
+      await apiClient.get<AdminDocumentListResponse>("/admin/documents");
+    return res.data;
+  },
+
+  deleteDocument: async (
+    filename: string,
+  ): Promise<{ success: boolean; filename: string; message: string }> => {
+    const encoded = encodeURIComponent(filename);
+    const res = await apiClient.delete<{
+      success: boolean;
+      filename: string;
+      message: string;
+    }>(`/admin/documents/${encoded}`);
+    return res.data;
   },
 };
 
