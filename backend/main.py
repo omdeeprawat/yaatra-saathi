@@ -1,10 +1,10 @@
 from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from core.config import settings
-from db.database import Base, engine
-from routers import health, auth, posts
+from routers import health, auth, posts, upload, stories, chat, admin, map
 
-Base.metadata.create_all(bind=engine)
+import models 
 
 app = FastAPI(
     title = "yaatra-saathi",
@@ -23,14 +23,29 @@ app.add_middleware(
     allow_headers = ["*"]
 )
 
-app.include_router(health.router)
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key = settings.SECRET_KEY, 
+    same_site="lax", 
+    https_only = False
+)
+
 app.include_router(auth.router)
 app.include_router(posts.router)
+app.include_router(upload.router)
+app.include_router(stories.router)
+app.include_router(chat.router)
+app.include_router(admin.router)
+app.include_router(map.router)
+app.include_router(health.router)
 
 @app.get("/")
 def root():
     return {
         "app" : settings.APP_NAME,
         "docs" : "/docs",
-        "health" : "/health"
+        "redoc" : "/redoc",
+        "health" : "/health",
+        "version" : "1.0.0"
     }
+

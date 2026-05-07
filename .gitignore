@@ -25,3 +25,8 @@ dist-ssr
 
 
 .venv
+__pycache__
+.env
+node_modules
+.vite
+backend/chroma_db/
