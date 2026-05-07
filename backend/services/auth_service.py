@@ -4,15 +4,10 @@ from models.user import User, AuthProvider
 from core.security import get_password_hash, verify_password
 from schemas.auth import RegisterRequest
 
-from core.config import settings
-import redis
 import secrets
 from datetime import datetime, timedelta
 from tasks.email_tasks import send_otp_email, send_welcome_email
 from db.database import SessionLocal
-
-
-redis_client = redis.from_url(settings.REDIS_URL)
 
 
 def get_user_by_email(db:Session, email : str) -> User | None:
@@ -202,11 +197,6 @@ def verify_otp(user_id: int, otp: str):
 
 def resend_otp(user_id: int):
   """Resend OTP with rate limiting"""
-  # rate limiting check using Redis
-  rate_limit_key = f"otp_resend:{user_id}"
-  if redis_client.exists(rate_limit_key):
-    raise ValueError("Please wait 1 minute before requesting a new OTP")
-  
   db = SessionLocal()
   try:
     user = db.query(User).filter(User.id == user_id).first()
@@ -225,9 +215,6 @@ def resend_otp(user_id: int):
     
     
     send_otp_email.delay(user.email, user.full_name, otp)
-    
-    # rate limit (1 minute)
-    redis_client.setex(rate_limit_key, 60, "1")
     
     return {"success": True, "message": "OTP resent successfully"}
 
