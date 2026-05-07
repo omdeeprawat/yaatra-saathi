@@ -8,6 +8,7 @@ import PostCardSkeleton from "@/components/feed/PostCardSkeleton";
 import PostComposer from "@/components/feed/PostComposer";
 import EmptyState from "@/components/ui/EmptyState";
 import type { Post } from "@/types";
+import AppShell from "@/components/layout/AppShell";
 
 export default function Feed() {
   const { isAuthenticated } = useAuth();
@@ -48,7 +49,8 @@ export default function Feed() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <AppShell title="Community" subtitle="Pilgrim feed · real time">
+      <div className="max-w-3xl mx-auto px-2 sm:px-0 py-2">
       {/* Page header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -144,6 +146,7 @@ export default function Feed() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppShell>
   );
 }
