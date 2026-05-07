@@ -6,11 +6,12 @@ class Settings(BaseSettings):
   DEBUG : bool = True
 
   DATABASE_URL : str
+  REDIS_URL : str
 
   # jwt
   SECRET_KEY : str
   ALGORITHM : str
-  ACCESS_TOKEN_EXPIRE_MINUTES : int = 60
+  ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
 
   # google oauth
   GOOGLE_CLIENT_ID : Optional[str] = None
@@ -29,8 +30,10 @@ class Settings(BaseSettings):
   OPENAI_API_KEY: Optional[str] = None
   GROQ_API_KEY: Optional[str] = None
 
+  RESEND_API_KEY: Optional[str] = None
+  RESEND_FROM_EMAIL: str = "onboarding@resend.dev"
+
   REFRESH_TOKEN_EXPIRE_DAYS: int = 30
-  ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
 
   CHROMA_DB_PATH: str = "./chroma_db"
   CHROMA_COLLECTION: str = "yatra_knowledge"

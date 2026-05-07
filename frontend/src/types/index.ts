@@ -32,6 +32,21 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface RegisterOtpResponse {
+  user_id: number;
+  message: string;
+}
+
+export interface VerifyOtpRequest {
+  user_id: number;
+  otp: string;
+}
+
+export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;

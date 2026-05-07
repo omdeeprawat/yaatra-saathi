@@ -10,6 +10,7 @@ import type {
   AuthState,
   LoginRequest,
   RegisterRequest,
+  RegisterOtpResponse,
   UpdateProfileRequest,
 } from "@/types";
 import { authApi } from "@/services/api";
@@ -17,7 +18,7 @@ import { authApi } from "@/services/api";
 // import {User} from '@/types';
 interface AuthContextType extends AuthState {
   login: (data: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<RegisterOtpResponse>;
   logout: () => Promise<void>;
   googleLogin: () => void;
   handleOAuthCallback: (token: string) => Promise<void>;
@@ -83,14 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: RegisterRequest) => {
-    const response = await authApi.register(data);
-    localStorage.setItem("access_token", response.access_token);
-    setState({
-      user: response.user,
-      token: response.access_token,
-      isLoading: false,
-      isAuthenticated: true,
-    });
+    return authApi.register(data);
   };
 
   const logout = async () => {

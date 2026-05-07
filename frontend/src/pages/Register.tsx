@@ -1,12 +1,13 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mountain, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { GoogleLogo as GoogleLogoIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/hooks/useAuth";
 import InputField from "@/components/ui/InputField";
 import Spinner from "@/components/ui/Spinner";
 import toast from "react-hot-toast";
+import projectLogo from "@/assets/Logo maker project.png";
 
 interface FormState {
   full_name: string;
@@ -60,13 +61,19 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await register({
+      const result = await register({
         email: form.email,
         full_name: form.full_name,
         password: form.password,
       });
-      toast.success("Account created! Welcome to Yatra Saathi 🏔");
-      navigate("/dashboard", { replace: true });
+      toast.success("OTP sent to your email. Please verify it.");
+      navigate("/verify-otp", {
+        replace: true,
+        state: {
+          userId: result.user_id,
+          email: form.email,
+        },
+      });
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { detail?: string } } })?.response?.data
@@ -88,7 +95,13 @@ export default function Register() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Mountain className="w-8 h-8 text-saffron-500" />
+            <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/95 ring-1 ring-mountain-600/70 shrink-0">
+              <img
+                src={projectLogo}
+                alt="Yatra Saathi logo"
+                className="w-full h-full object-contain object-center scale-[2.8]"
+              />
+            </div>
             <span className="font-display text-2xl font-bold text-stone-100">
               Yatra <span className="text-saffron-500">Saathi</span>
             </span>

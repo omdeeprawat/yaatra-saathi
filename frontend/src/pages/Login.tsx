@@ -1,19 +1,23 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Mountain, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { GoogleLogo as GoogleLogoIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/hooks/useAuth";
 import InputField from "@/components/ui/InputField";
 import Spinner from "@/components/ui/Spinner";
 import toast from "react-hot-toast";
+import projectLogo from "@/assets/Logo maker project.png";
 
 export default function Login() {
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const initialEmail =
+    (location.state as { email?: string } | null)?.email ?? "";
+
+  const [form, setForm] = useState({ email: initialEmail, password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
   );
@@ -67,7 +71,13 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Mountain className="w-8 h-8 text-saffron-500" />
+            <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/95 ring-1 ring-mountain-600/70 shrink-0">
+              <img
+                src={projectLogo}
+                alt="Yatra Saathi logo"
+                className="w-full h-full object-contain object-center scale-[2.8]"
+              />
+            </div>
             <span className="font-display text-2xl font-bold text-stone-100">
               Yatra <span className="text-saffron-500">Saathi</span>
             </span>

@@ -9,6 +9,7 @@ from schemas.auth import UserResponse, TokenResponse, RegisterRequest, LoginRequ
 from db.database import get_db
 from core.security import create_access_token, create_refresh_token, decode_refresh_token
 from core.dependencies import get_current_user, get_user_by_id
+from core.rate_limiter import otp_resend_limiter
 from models.user import User, AuthProvider
 
 from typing import Optional
@@ -16,10 +17,23 @@ from typing import Optional
 from services.auth_service import (
   create_user,
   authenticate_user,
-  get_or_create_oauth_user
+  get_or_create_oauth_user,
+  register_user_with_verification,
+  verify_otp,
+  resend_otp
 )
 
+from pydantic import BaseModel
+
 router = APIRouter(prefix = "/auth" , tags=["auth"])
+
+class VerifyOTPRequest(BaseModel):
+  user_id:int
+  otp:str
+
+class ResendOTPRequest(BaseModel):
+  user_id : int
+
 
 oauth = OAuth()
 oauth.register(
@@ -41,24 +55,75 @@ def set_refresh_cookie(response: Response, token: str):
     )
 
 
-@router.post("/register", response_model = TokenResponse, status_code = status.HTTP_201_CREATED)
-def register(data : RegisterRequest, response: Response, db : Session = Depends(get_db)):
-  """ registering a new user with email and password"""
-  user = create_user(db, data)
-  access_token = create_access_token({"sub" : str(user.id)})
-  refresh_token = create_refresh_token({"sub" : str(user.id)})
-  set_refresh_cookie(response, refresh_token)
-  return TokenResponse(access_token = access_token, user = UserResponse.model_validate(user))
+# @router.post("/register", response_model = TokenResponse, status_code = status.HTTP_201_CREATED)
+# def register(data : RegisterRequest, response: Response, db : Session = Depends(get_db)):
+@router.post("/register", status_code = status.HTTP_201_CREATED)
+def register(data:RegisterRequest):
+  """ registering a new user and send otp mail. user have to verify the email"""
+  try:
+    result = register_user_with_verification(
+      email = data.email,
+      password=data.password,
+      full_name = data.full_name
+    )
+    return result
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=str(e))
+
+  # ---------> token based registration
+
+  # user = create_user(db, data)
+  # access_token = create_access_token({"sub" : str(user.id)})
+  # refresh_token = create_refresh_token({"sub" : str(user.id)})
+  # set_refresh_cookie(response, refresh_token)
+  # return TokenResponse(access_token = access_token, user = UserResponse.model_validate(user))
 
 
-@router.post("/login", response_model = TokenResponse)
-def login(data : LoginRequest, response : Response, db : Session = Depends(get_db)):
-  """ login with email and password. a jwt token is returned"""
-  user = authenticate_user(db, data.email, data.password)
-  access_token = create_access_token({"sub" : str(user.id)})
-  refresh_token = create_refresh_token({"sub" : str(user.id)})
+@router.post('/verify-otp')
+def verify_email(data:VerifyOTPRequest):
+  try:
+    result = verify_otp(user_id=data.user_id, otp = data.otp)
+    return result
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/resend-otp")
+async def resend_otp_code(data: ResendOTPRequest):
+  """Resend OTP (rate limited to 1/minute)"""
+  try:
+    await otp_resend_limiter.check_rate_limit(data.user_id)
+    result = resend_otp(user_id=data.user_id)
+    return result
+  except ValueError as e:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+  
+# -----------------> token based login function
+# @router.post("/login", response_model = TokenResponse)
+# def login(data : LoginRequest, response : Response, db : Session = Depends(get_db)):
+#   """ login with email and password. a jwt token is returned"""
+#   user = authenticate_user(db, data.email, data.password)
+#   access_token = create_access_token({"sub" : str(user.id)})
+#   refresh_token = create_refresh_token({"sub" : str(user.id)})
+#   set_refresh_cookie(response, refresh_token)
+#   return TokenResponse(access_token = access_token, user = UserResponse.model_validate(user))
+
+
+@router.post('/login', response_model=TokenResponse)
+def login(data:LoginRequest, response: Response, db: Session = Depends(get_db)):
+  user = authenticate_user(db, data.email , data.password)
+
+  if not user.is_verified:
+    raise HTTPException(
+      status_code=status.HTTP_403_FORBIDDEN,
+      detail = 'email not verified. please check your email for otp'
+    )
+
+  access_token = create_access_token({"sub": str(user.id)})
+  refresh_token = create_refresh_token({"sub": str(user.id)})
   set_refresh_cookie(response, refresh_token)
-  return TokenResponse(access_token = access_token, user = UserResponse.model_validate(user))
+  return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -99,7 +164,7 @@ def update_profile(
 def logout(response : Response):
   response.delete_cookie("refresh_token")
   return {
-    "message" : "logged out successful"
+    "message" : "logged out successfully"
   }
 
   
