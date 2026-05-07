@@ -1,9 +1,12 @@
 import StoriesSection from "@/components/stories/StoriesSection";
+import AppShell from "@/components/layout/AppShell";
 
 export default function Stories() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-6">
-      <StoriesSection />
-    </div>
+    <AppShell title="Stories" subtitle="Sacred narratives and culture">
+      <div className="py-2">
+        <StoriesSection />
+      </div>
+    </AppShell>
   );
 }

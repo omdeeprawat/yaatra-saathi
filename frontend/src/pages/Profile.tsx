@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { uploadApi } from "@/services/api";
-import { User, Camera, Loader2, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { User, Camera, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import AppShell from "@/components/layout/AppShell";
 
 export default function Profile() {
   const { user, updateProfile } = useAuth();
@@ -56,21 +56,13 @@ export default function Profile() {
   };
 
   return (
-    <div className="max-w-lg mx-auto py-12 px-4">
-      <Link
-        to="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-200 mb-8 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
-      </Link>
-
-      <h1 className="font-display text-2xl font-bold text-stone-100 mb-8">
+    <AppShell title="Settings" subtitle="Profile and account preferences">
+      <h1 className="mb-8 font-display text-2xl font-bold text-stone-100">
         Edit Profile
       </h1>
 
       {/* Avatar */}
-      <div className="flex flex-col items-center mb-8">
+      <div className="mb-8 flex flex-col items-center">
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
@@ -103,11 +95,11 @@ export default function Profile() {
           className="hidden"
           onChange={handleAvatarChange}
         />
-        <p className="text-xs text-stone-500 mt-2">Click to change photo</p>
+        <p className="mt-2 text-xs text-stone-500">Click to change photo</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSave} className="space-y-6">
+      <form id="edit-profile-form" onSubmit={handleSave} className="space-y-6">
         <div>
           <label
             htmlFor="email"
@@ -157,6 +149,6 @@ export default function Profile() {
           )}
         </button>
       </form>
-    </div>
+    </AppShell>
   );
 }

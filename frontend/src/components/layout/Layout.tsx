@@ -1,11 +1,20 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "@/components/navbar/Navbar";
 
 export default function Layout() {
+  const { pathname } = useLocation();
+  const hideNavbar =
+    pathname === "/dashboard" ||
+    pathname === "/chat" ||
+    pathname === "/feed" ||
+    pathname === "/stories" ||
+    pathname === "/profile" ||
+    pathname.startsWith("/stories/");
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <div className="relative min-h-screen flex flex-col">
+      {!hideNavbar && <Navbar />}
+      <main className="relative z-10 flex-1">
         <Outlet />
       </main>
     </div>
