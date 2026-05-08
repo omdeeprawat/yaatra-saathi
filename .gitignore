@@ -30,3 +30,6 @@ __pycache__
 node_modules
 .vite
 backend/chroma_db/
+backend/.env
+backend/venv/
+backend/__pycache__/
