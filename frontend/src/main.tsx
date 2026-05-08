@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
-=======
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -94,7 +82,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  return user?.role === "admin" ? <>{children}</> : <Navigate to="/dashboard" replace />;
+  return user?.role === "admin" ? (
+    <>{children}</>
+  ) : (
+    <Navigate to="/dashboard" replace />
+  );
 }
 
 function App() {
@@ -209,4 +201,3 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
->>>>>>> develop
