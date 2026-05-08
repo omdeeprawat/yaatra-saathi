@@ -94,6 +94,7 @@ orjson==3.11.9
 ormsgpack==1.12.2
 overrides==7.7.0
 packaging==26.2
+pathlib==1.0.1
 prompt-toolkit==3.0.52
 propcache==0.4.1
 protobuf==6.33.6
