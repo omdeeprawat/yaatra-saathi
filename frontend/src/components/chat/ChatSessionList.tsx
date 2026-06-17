@@ -2,7 +2,10 @@ import { MessageSquare, Trash2, Edit2, Check, X } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatSession } from "@/types";
-import { useUpdateChatSession, useDeleteChatSession } from "@/hooks/useChatSessions";
+import {
+  useUpdateChatSession,
+  useDeleteChatSession,
+} from "@/hooks/useChatSessions";
 
 interface ChatSessionListItemProps {
   session: ChatSession;
