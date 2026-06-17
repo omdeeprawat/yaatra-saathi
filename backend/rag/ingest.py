@@ -15,7 +15,7 @@ from langchain_community.document_loaders import (
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from rag.vector_store import get_vector_store, get_chroma_client, get_collection_count
+from rag.vector_store import get_vector_store, get_chroma_client, get_collection_count,collection_exists_and_has_docs
 from core.config import settings
 
 

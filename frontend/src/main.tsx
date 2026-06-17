@@ -82,7 +82,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  return user?.role === "admin" ? <>{children}</> : <Navigate to="/dashboard" replace />;
+  return user?.role === "admin" ? (
+    <>{children}</>
+  ) : (
+    <Navigate to="/dashboard" replace />
+  );
 }
 
 function App() {

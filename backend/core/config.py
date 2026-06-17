@@ -6,23 +6,37 @@ class Settings(BaseSettings):
   DEBUG : bool = True
 
   DATABASE_URL : str
+
+
   REDIS_URL : str
+
 
   # jwt
   SECRET_KEY : str
   ALGORITHM : str
-  ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+
+  ACCESS_TOKEN_EXPIRE_MINUTES : int = 15
+
+  ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
 
   # google oauth
   GOOGLE_CLIENT_ID : Optional[str] = None
   GOOGLE_CLIENT_SECRET : Optional[str] = None
-  GOOGLE_REDIRECT_URI : str = 'http://127.0.0.1:8000/auth/google/callback' 
+
+  GOOGLE_REDIRECT_URI : str = 'http://localhost:8000/auth/google/callback' 
+
+  # GOOGLE_REDIRECT_URI : str = 'http://127.0.0.1:8000/auth/google/callback' 
+
 
   FRONTEND_URL : str = 'http://localhost:5173'
 
   CLOUDINARY_CLOUD_NAME: Optional[str] = None
   CLOUDINARY_API_KEY: Optional[str] = None
   CLOUDINARY_API_SECRET: Optional[str] = None
+
+
+  OPENAI_API_KEY: Optional[str] = None
 
   AI_PROVIDER : str = 'groq'
 
@@ -44,10 +58,14 @@ class Settings(BaseSettings):
   CHAT_MODEL: str = "llama-3.3-70b-versatile"
   EMBED_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
+
   class Config:
     env_file = ".env"
     case_sensitive = True
+
+
     extra = "ignore"
+
 
 
 settings = Settings()

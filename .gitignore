@@ -30,3 +30,22 @@ __pycache__
 node_modules
 .vite
 backend/chroma_db/
+backend/.env
+backend/venv/
+backend/__pycache__/
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+.venv/
+venv/
+
+# Environment files
+.env
+*.env
+
+# ChromaDB
+chroma_db/

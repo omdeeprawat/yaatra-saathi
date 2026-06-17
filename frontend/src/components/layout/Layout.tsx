@@ -9,6 +9,9 @@ export default function Layout() {
     pathname === "/feed" ||
     pathname === "/stories" ||
     pathname === "/profile" ||
+    pathname === "/route-map" || 
+    pathname === "/map" ||
+    pathname ===  "/admin" ||
     pathname.startsWith("/stories/");
 
   return (

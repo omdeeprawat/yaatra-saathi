@@ -44,7 +44,7 @@ const NAV_ITEMS = [
     label: "AI Guide",
     to: "/chat",
     icon: MessageSquare,
-    badge: "new",
+    
   },
   { section: "Main", label: "Route Map", to: "/map", icon: MapPin },
   { section: "Main", label: "Community", to: "/feed", icon: Users },
@@ -56,8 +56,8 @@ const NAV_ITEMS = [
     icon: Users,
     badge: "7",
   },
-  { section: "System", label: "RAG Pipeline", to: "/chat", icon: Blocks },
-  { section: "System", label: "Logs", to: "/feed", icon: Clock3 },
+  // { section: "System", label: "RAG Pipeline", to: "/chat", icon: Blocks },
+  // { section: "System", label: "Logs", to: "/feed", icon: Clock3 },
   { section: "System", label: "Settings", to: "/profile", icon: Settings },
 ];
 
@@ -366,7 +366,7 @@ export default function AppShell({
               <>
                 <Link to="/stories" className="btn-secondary h-10 px-4">
                   <BookOpen className="w-4 h-4" />
-                  View docs
+                  View Stories
                 </Link>
                 <Link to="/chat" className="btn-primary h-10 px-4">
                   New query
