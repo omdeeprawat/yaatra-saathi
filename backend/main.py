@@ -16,6 +16,7 @@ app = FastAPI(
     redoc_url = "/redoc"
 )
 
+print("FRONTEND_URL =", settings.FRONTEND_URL)
 # C0RS handling
 app.add_middleware(
     CORSMiddleware,
@@ -24,7 +25,6 @@ app.add_middleware(
     allow_methods = ["*"],
     allow_headers = ["*"]
 )
-print("FRONTEND_URL =", settings.FRONTEND_URL)
 app.add_middleware(
     SessionMiddleware, 
     secret_key = settings.SECRET_KEY, 
