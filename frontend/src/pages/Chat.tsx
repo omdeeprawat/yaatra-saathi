@@ -1,18 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trash2, AlertCircle, WifiOff } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
-import { chatApi } from '@/services/api';
+import { chatApi, chatHistoryApi } from '@/services/api';
 import ChatMessageBubble from '@/components/chat/ChatMessage';
 import StreamingBubble from '@/components/chat/StreamingBubble';
 import SuggestedQuestions from '@/components/chat/SuggestedQuestions';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatWelcome from '@/components/chat/ChatWelcome';
+import ChatSessionsSidebar from '@/components/chat/ChatSessionsSidebar';
 import Spinner from '@/components/ui/Spinner';
 import AppShell from '@/components/layout/AppShell';
 
 export default function Chat() {
   const { messages, isStreaming, streamingContent, error, sendMessage, clearMessages } = useChat();
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasMessages = messages.length > 0;
 
@@ -32,6 +34,22 @@ export default function Chat() {
   const handleSend = (message: string, imageUrl?: string) => {
     if (!chatStatus?.ready) return;
     sendMessage(message, imageUrl);
+  };
+
+  const handleNewSession = () => {
+    clearMessages();
+  };
+
+  const handleSelectSession = async (sessionId: string) => {
+    try {
+      setActiveSessionId(sessionId);
+      clearMessages();
+      // Load session history
+      await chatHistoryApi.getHistory(sessionId, 50, 0);
+      // TODO: Load history into chat store
+    } catch (err) {
+      console.error("Failed to load session", err);
+    }
   };
 
   //status gate 
@@ -75,78 +93,88 @@ export default function Chat() {
   
   return (
     <AppShell title="AI Guide" subtitle="RAG assistant · live">
-      <div className="h-[calc(100vh-12.5rem)] flex flex-col max-w-3xl mx-auto">
+      <div className="flex h-[calc(100vh-12.5rem)] gap-0">
+        {/* Chat Sessions Sidebar */}
+        <ChatSessionsSidebar
+          activeSessionId={activeSessionId}
+          onSessionSelect={handleSelectSession}
+          onNewSession={handleNewSession}
+        />
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3
-                      border-b border-mountain-700/50 shrink-0">
-        <div>
-          <h1 className="font-sans font-semibold text-stone-100 text-sm">
-            Yatra AI Guide
-          </h1>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="font-sans text-xs text-stone-500">
-              {chatStatus.chunk_count} knowledge chunks indexed
-            </span>
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3
+                        border-b border-mountain-700/50 shrink-0">
+          <div>
+            <h1 className="font-sans font-semibold text-stone-100 text-sm">
+              Yatra AI Guide
+            </h1>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="font-sans text-xs text-stone-500">
+                {chatStatus.chunk_count} knowledge chunks indexed
+              </span>
+            </div>
           </div>
+
+          {hasMessages && (
+            <button
+              onClick={clearMessages}
+              disabled={isStreaming}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs
+                         font-sans text-stone-500 hover:text-red-400
+                         hover:bg-red-500/10 transition-colors disabled:opacity-40"
+              title="Clear conversation"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Clear
+            </button>
+          )}
         </div>
 
-        {hasMessages && (
-          <button
-            onClick={clearMessages}
+        {/* Messages area */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
+
+          
+          {!hasMessages && !isStreaming && (
+            <ChatWelcome />
+          )}
+
+          
+          {messages.map(msg => (
+            <ChatMessageBubble key={msg.id} message={msg} />
+          ))}
+
+          {/* Live streaming bubble */}
+          {isStreaming && (
+            <StreamingBubble content={streamingContent} />
+          )}
+
+          {/* Error state */}
+          {error && (
+            <div className="flex items-start gap-3 p-3 rounded-xl
+                            bg-red-500/10 border border-red-500/20">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <p className="font-sans text-xs text-red-400">{error}</p>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        
+        {!hasMessages && (
+          <SuggestedQuestions
+            onSelect={q => handleSend(q)}
             disabled={isStreaming}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs
-                       font-sans text-stone-500 hover:text-red-400
-                       hover:bg-red-500/10 transition-colors disabled:opacity-40"
-            title="Clear conversation"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
-
-        
-        {!hasMessages && !isStreaming && (
-          <ChatWelcome />
+          />
         )}
 
-        
-        {messages.map(msg => (
-          <ChatMessageBubble key={msg.id} message={msg} />
-        ))}
-
-        {/* Live streaming bubble */}
-        {isStreaming && (
-          <StreamingBubble content={streamingContent} />
-        )}
-
-        {/* Error state */}
-        {error && (
-          <div className="flex items-start gap-3 p-3 rounded-xl
-                          bg-red-500/10 border border-red-500/20">
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-            <p className="font-sans text-xs text-red-400">{error}</p>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      
-      {!hasMessages && (
-        <SuggestedQuestions
-          onSelect={q => handleSend(q)}
-          disabled={isStreaming}
-        />
-      )}
-
-      {/* Input */}
-      <ChatInput onSend={handleSend} isStreaming={isStreaming} />
+        {/* Input */}
+        <ChatInput onSend={handleSend} isStreaming={isStreaming} />
+        </div>
       </div>
     </AppShell>
   );

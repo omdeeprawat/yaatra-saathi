@@ -100,6 +100,86 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+// chat history and session
+export interface PersistentChatMessage {
+  id: number;
+  session_id: string;
+  role: "user" | "assistant";
+  content: string;
+  message_order: number;
+  agent_name?: string;
+  verified: boolean;
+  confidence_score: number;
+  sources?: Array<{ source: string; score: number }>;
+  route?: string;
+  created_at: string;
+}
+
+export interface ChatSession {
+  id: number;
+  session_id: string;
+  user_id: number;
+  title?: string;
+  topic?: string;
+  is_active: boolean;
+  total_messages: number;
+  created_at: string;
+  updated_at: string;
+  last_accessed_at: string;
+  archived: boolean;
+  messages?: PersistentChatMessage[];
+}
+
+export interface ChatHistoryResponse {
+  session_id: string;
+  messages: PersistentChatMessage[];
+  total_count: number;
+  has_more: boolean;
+}
+
+export interface CreateChatSessionRequest {
+  title?: string;
+}
+
+// Comments
+export interface PostCommentUser {
+  id: number;
+  name: string;
+  avatar_url?: string;
+}
+
+export interface PostComment {
+  id: number;
+  post_id: number;
+  user_id: number;
+  parent_comment_id?: number;
+  content: string;
+  depth: number;
+  like_count: number;
+  created_at: string;
+  updated_at: string;
+  is_edited: boolean;
+  edited_at?: string;
+  user: PostCommentUser;
+  replies?: PostComment[];
+  user_liked?: boolean;
+}
+
+export interface CommentThreadResponse {
+  post_id: number;
+  comments: PostComment[];
+  total_count: number;
+}
+
+export interface CreateCommentRequest {
+  content: string;
+  parent_comment_id?: number;
+}
+
+export interface UpdateCommentRequest {
+  content: string;
+}
+
 // API
 
 export interface ApiError {
