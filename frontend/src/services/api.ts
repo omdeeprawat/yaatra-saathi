@@ -11,6 +11,13 @@ import type {
   User,
   PaginatedResponse,
   Post,
+  ChatSession,
+  ChatHistoryResponse,
+  CreateChatSessionRequest,
+  PostComment,
+  CommentThreadResponse,
+  CreateCommentRequest,
+  UpdateCommentRequest,
 } from "@/types";
 
 const apiClient: AxiosInstance = axios.create({
@@ -282,6 +289,115 @@ export const chatApi = {
       },
       body: JSON.stringify(request),
     });
+  },
+};
+
+// Chat History API
+
+export const chatHistoryApi = {
+  createSession: async (
+    request: CreateChatSessionRequest,
+  ): Promise<ChatSession> => {
+    const res = await apiClient.post<ChatSession>("/chat/session", request);
+    return res.data;
+  },
+
+  getSessions: async (limit = 20, offset = 0): Promise<ChatSession[]> => {
+    const res = await apiClient.get<ChatSession[]>(
+      `/chat/sessions?limit=${limit}&offset=${offset}`,
+    );
+    return res.data;
+  },
+
+  getSession: async (sessionId: string): Promise<ChatSession> => {
+    const res = await apiClient.get<ChatSession>(`/chat/session/${sessionId}`);
+    return res.data;
+  },
+
+  getHistory: async (
+    sessionId: string,
+    limit = 12,
+    offset = 0,
+  ): Promise<ChatHistoryResponse> => {
+    const res = await apiClient.get<ChatHistoryResponse>(
+      `/chat/history/${sessionId}?limit=${limit}&offset=${offset}`,
+    );
+    return res.data;
+  },
+
+  updateSession: async (
+    sessionId: string,
+    title?: string,
+    archived?: boolean,
+  ): Promise<ChatSession> => {
+    const res = await apiClient.put<ChatSession>(`/chat/session/${sessionId}`, {
+      title,
+      archived,
+    });
+    return res.data;
+  },
+
+  deleteSession: async (sessionId: string): Promise<void> => {
+    await apiClient.delete(`/chat/session/${sessionId}`);
+  },
+};
+
+// Comments API
+
+export const commentsApi = {
+  getComments: async (
+    postId: number,
+    sort: "recent" | "top" = "recent",
+  ): Promise<CommentThreadResponse> => {
+    const res = await apiClient.get<CommentThreadResponse>(
+      `/posts/${postId}/comments?sort=${sort}`,
+    );
+    return res.data;
+  },
+
+  getComment: async (
+    postId: number,
+    commentId: number,
+  ): Promise<PostComment> => {
+    const res = await apiClient.get<PostComment>(
+      `/posts/${postId}/comments/${commentId}`,
+    );
+    return res.data;
+  },
+
+  createComment: async (
+    postId: number,
+    request: CreateCommentRequest,
+  ): Promise<PostComment> => {
+    const res = await apiClient.post<PostComment>(
+      `/posts/${postId}/comments`,
+      request,
+    );
+    return res.data;
+  },
+
+  updateComment: async (
+    postId: number,
+    commentId: number,
+    request: UpdateCommentRequest,
+  ): Promise<PostComment> => {
+    const res = await apiClient.put<PostComment>(
+      `/posts/${postId}/comments/${commentId}`,
+      request,
+    );
+    return res.data;
+  },
+
+  deleteComment: async (postId: number, commentId: number): Promise<void> => {
+    await apiClient.delete(`/posts/${postId}/comments/${commentId}`);
+  },
+
+  likeComment: async (postId: number, commentId: number): Promise<void> => {
+    await apiClient.post(`/posts/${postId}/comments/${commentId}/like`);
+  },
+
+  unlikeComment: async (postId: number, commentId: number): Promise<void> => {
+    await apiClient.delete(`/posts/${postId}/comments/${commentId}/like`);
   },
 };
 
