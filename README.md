@@ -15,6 +15,7 @@ Yaatra Saathi is an AI-powered companion app for the Nanda Devi Raj Jat Yatra. I
 ## Tech Stack
 
 ### Backend
+
 - FastAPI
 - SQLAlchemy + Alembic
 - PostgreSQL
@@ -25,6 +26,7 @@ Yaatra Saathi is an AI-powered companion app for the Nanda Devi Raj Jat Yatra. I
 - Resend for email delivery
 
 ### Frontend
+
 - React 19 + TypeScript
 - Vite
 - React Router
@@ -70,26 +72,31 @@ yaatra-saathi/
 ## Main Features by Area
 
 ### Public site
+
 - Landing page with project overview and feature highlights
 - Public feed preview and story previews
 - Route/map discovery for yatra stops
 
 ### Authentication
+
 - Register, login, OTP verification, and profile update flow
 - Google OAuth callback support
 - Protected route handling on the frontend
 
 ### Community
+
 - Post creation and deletion
 - Comment threads, replies, and likes
 - Community feed browsing with pagination
 
 ### Chat and RAG
+
 - Streaming AI chat responses
 - Knowledge-base ingestion and status tracking
 - Chat session history and export support
 
 ### Admin
+
 - Admin-only document upload
 - Ingestion trigger and knowledge-base status view
 - System-level dashboard with readiness checks
@@ -124,6 +131,7 @@ yaatra-saathi/
 - Redis
 
 Optional but recommended for full AI features:
+
 - Groq API key or OpenAI API key
 - Cloudinary credentials for image uploads
 - Resend API key for email delivery
@@ -182,6 +190,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Backend URLs:
+
 - API: `http://localhost:8000`
 - Docs: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
@@ -195,6 +204,7 @@ npm run dev
 ```
 
 Frontend URL:
+
 - `http://localhost:5173`
 
 ## Run the Full App Locally
@@ -228,4 +238,3 @@ Frontend URL:
 ## License
 
 Add your preferred license here before publishing to GitHub.
-
