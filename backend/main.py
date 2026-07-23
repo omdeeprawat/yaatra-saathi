@@ -17,6 +17,8 @@ app = FastAPI(
 )
 
 print("FRONTEND_URL =", settings.FRONTEND_URL)
+print("GOOGLE_CLIENT_ID:", settings.GOOGLE_CLIENT_ID)
+print("GOOGLE_REDIRECT_URI:", settings.GOOGLE_REDIRECT_URI)
 # C0RS handling
 app.add_middleware(
     CORSMiddleware,
