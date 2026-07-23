@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
-  Blocks,
   BookOpen,
   ChevronLeft,
   ChevronUp,
-  Clock3,
   FileText,
   Home,
   LayoutDashboard,

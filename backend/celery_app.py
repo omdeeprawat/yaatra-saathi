@@ -5,7 +5,7 @@ celery_app = Celery(
   'yaatra-saathi',
   broker = settings.REDIS_URL,
   backend=settings.REDIS_URL,
-  include=['tasks.email_tasks']
+  include=['tasks.email_tasks', 'tasks.rag_tasks']
 )
 
 celery_app.conf.update(
