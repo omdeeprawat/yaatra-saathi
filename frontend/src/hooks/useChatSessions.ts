@@ -26,7 +26,11 @@ export function useChatSession(sessionId: string | null) {
 /**
  * Hook for fetching paginated chat history for a session
  */
-export function useChatHistory(sessionId: string | null, limit = 12, offset = 0) {
+export function useChatHistory(
+  sessionId: string | null,
+  limit = 12,
+  offset = 0,
+) {
   return useQuery({
     queryKey: ["chatHistory", sessionId, limit, offset],
     queryFn: () => chatHistoryApi.getHistory(sessionId!, limit, offset),
@@ -78,7 +82,9 @@ export function useUpdateChatSession() {
         ["chatSessions", 20, 0],
         (old: ChatSession[] | undefined) => {
           if (!old) return [updatedSession];
-          return old.map((s) => (s.session_id === sessionId ? updatedSession : s));
+          return old.map((s) =>
+            s.session_id === sessionId ? updatedSession : s,
+          );
         },
       );
       // Update the session detail
