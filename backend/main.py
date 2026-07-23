@@ -24,7 +24,7 @@ app.add_middleware(
     allow_methods = ["*"],
     allow_headers = ["*"]
 )
-
+print("FRONTEND_URL =", settings.FRONTEND_URL)
 app.add_middleware(
     SessionMiddleware, 
     secret_key = settings.SECRET_KEY, 
