@@ -6,6 +6,7 @@ interface ChatStore {
   isStreaming: boolean;
   streamingContent: string;
   error: string | null;
+  sessionId: string | null;
 
   addUserMessage: (content: string, imageUrl?: string) => string;
   startAssistantMessage: () => void;
@@ -13,6 +14,7 @@ interface ChatStore {
   finalizeAssistantMessage: () => void;
   setError: (error: string | null) => void;
   clearMessages: () => void;
+  setSessionId: (sessionId: string | null) => void;
 }
 
 function generateId(): string {
@@ -24,6 +26,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   isStreaming: false,
   streamingContent: "",
   error: null,
+  sessionId: null,
 
   addUserMessage: (content, imageUrl) => {
     const id = generateId();
@@ -76,5 +79,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       streamingContent: "",
       error: null,
     });
+  },
+
+  setSessionId: (sessionId) => {
+    set({ sessionId });
   },
 }));
