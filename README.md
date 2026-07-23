@@ -23,7 +23,7 @@ Yaatra Saathi is an AI-powered companion app for the Nanda Devi Raj Jat Yatra. I
 - ChromaDB / LangChain / LangGraph for RAG
 - Groq or OpenAI-compatible LLM support
 - Cloudinary for image uploads
-- Resend for email delivery
+- EmailJS for email delivery
 
 ### Frontend
 
@@ -134,7 +134,7 @@ Optional but recommended for full AI features:
 
 - Groq API key or OpenAI API key
 - Cloudinary credentials for image uploads
-- Resend API key for email delivery
+- EmailJS service/template keys for email delivery
 - Google OAuth client credentials
 
 ## Environment Variables
@@ -159,8 +159,14 @@ CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 OPENAI_API_KEY=
 GROQ_API_KEY=
-RESEND_API_KEY=
-RESEND_FROM_EMAIL=onboarding@resend.dev
+EMAILJS_API_URL=https://api.emailjs.com/api/v1.0/email/send
+EMAILJS_SERVICE_ID=
+EMAILJS_PUBLIC_KEY=
+EMAILJS_PRIVATE_KEY=
+EMAILJS_OTP_TEMPLATE_ID=
+EMAILJS_WELCOME_TEMPLATE_ID=
+EMAILJS_FROM_NAME=Yatra Saathi
+EMAILJS_FROM_EMAIL=onboarding@resend.dev
 AI_PROVIDER=groq
 CHROMA_DB_PATH=./chroma_db
 CHROMA_COLLECTION=yatra_knowledge
@@ -232,7 +238,7 @@ Frontend URL:
 ## Notes
 
 - The frontend uses `/api` as its API base path, so you may need a proxy or reverse proxy in development depending on your setup.
-- Google OAuth, Resend, Cloudinary, and Groq/OpenAI features are optional but required for the full experience.
+- Google OAuth, EmailJS, Cloudinary, and Groq/OpenAI features are optional but required for the full experience.
 - The `backend/chroma_db/` directory stores local vector data for the RAG pipeline.
 
 ## License

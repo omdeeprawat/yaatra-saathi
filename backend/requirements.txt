@@ -121,7 +121,6 @@ regex==2026.4.4
 requests==2.33.1
 requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
-resend==2.30.0
 rich==15.0.0
 rich-toolkit==0.19.7
 rpds-py==0.30.0
