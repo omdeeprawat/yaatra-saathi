@@ -1,128 +1,129 @@
 from celery import Task
 from celery_app import celery_app
-import resend
-from jinja2 import Template
+import httpx
 from core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 
-resend.api_key = settings.RESEND_API_KEY
-
 
 class EmailTask(Task):
-    """Base task with retry logic"""
+    """Base task with automatic retry."""
+
     autoretry_for = (Exception,)
     retry_kwargs = {"max_retries": 3}
     retry_backoff = True
 
 
+def _send_emailjs_template(
+    to_email: str,
+    template_id: str,
+    template_params: dict,
+):
+    """Send an email using an EmailJS template."""
+
+    required_config = {
+        "EMAILJS_SERVICE_ID": settings.EMAILJS_SERVICE_ID,
+        "EMAILJS_PUBLIC_KEY": settings.EMAILJS_PUBLIC_KEY,
+        "EMAILJS_API_URL": settings.EMAILJS_API_URL,
+    }
+
+    missing = [key for key, value in required_config.items() if not value]
+
+    if not template_id:
+        missing.append("EMAILJS template id")
+
+    if missing:
+        raise ValueError(
+            f"Missing EmailJS configuration: {', '.join(missing)}"
+        )
+
+    payload = {
+        "service_id": settings.EMAILJS_SERVICE_ID,
+        "template_id": template_id,
+        "user_id": settings.EMAILJS_PUBLIC_KEY,
+        "template_params": {
+            **template_params,
+            "to_email": to_email.strip(),
+        },
+    }
+
+    if settings.EMAILJS_PRIVATE_KEY:
+        payload["accessToken"] = settings.EMAILJS_PRIVATE_KEY
+
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    with httpx.Client(timeout=20.0) as client:
+        response = client.post(
+            settings.EMAILJS_API_URL,
+            json=payload,
+            headers=headers,
+        )
+
+        response.raise_for_status()
+        return response.text
+
+
 @celery_app.task(base=EmailTask, name="tasks.send_otp_email")
 def send_otp_email(email: str, name: str, otp: str):
-    """Send OTP verification email"""
-    if not settings.RESEND_API_KEY:
-        raise ValueError("RESEND_API_KEY is not configured")
-    
-    html_template = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body { font-family: 'Arial', sans-serif; background: #f5f5f5; }
-            .container { max-width: 600px; margin: 40px auto; background: white; 
-                         border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-            .header { background: linear-gradient(135deg, #E8650A 0%, #D97706 100%); 
-                      padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-            .header h1 { color: white; margin: 0; font-size: 28px; }
-            .content { padding: 40px 30px; }
-            .otp-box { background: #FEF3C7; border: 2px dashed #F59E0B; 
-                       padding: 20px; text-align: center; border-radius: 8px; 
-                       margin: 30px 0; }
-            .otp { font-size: 36px; font-weight: bold; color: #E8650A; 
-                   letter-spacing: 8px; font-family: 'Courier New', monospace; }
-            .footer { text-align: center; padding: 20px; color: #6B7280; 
-                      font-size: 14px; border-top: 1px solid #E5E7EB; }
-            .mountain { color: #2D3A8C; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>🏔 Yatra Saathi</h1>
-                <p style="color: white; margin: 10px 0 0 0;">
-                    Your Pilgrimage Companion
-                </p>
-            </div>
-            <div class="content">
-                <h2>Namaste {{ name }}!</h2>
-                <p>Thank you for registering with Yatra Saathi. To complete your 
-                   registration, please verify your email address.</p>
-                
-                <p>Your One-Time Password (OTP) is:</p>
-                
-                <div class="otp-box">
-                    <div class="otp">{{ otp }}</div>
-                </div>
-                
-                <p><strong>This OTP is valid for 10 minutes.</strong></p>
-                
-                <p>If you didn't request this, please ignore this email.</p>
-                
-                <p class="mountain">Jai Nanda Devi 🙏</p>
-            </div>
-            <div class="footer">
-                <p>Yatra Saathi © 2026 | Nanda Devi Raj Jat Yatra</p>
-                <p>This is an automated message, please do not reply.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    
-    template = Template(html_template)
-    html_content = template.render(name=name, otp=otp)
-    
+    """Send OTP verification email."""
+
+    if not settings.EMAILJS_OTP_TEMPLATE_ID:
+        raise ValueError("EMAILJS_OTP_TEMPLATE_ID is not configured")
+
     try:
-        response = resend.Emails.send({
-            "from": settings.RESEND_FROM_EMAIL,
-            "to": email.strip(),
-            "subject": "Verify Your Email - Yatra Saathi",
-            "html": html_content,
-        })
-        logger.info(f"OTP email sent to {email}: {response}")
-        return {"success": True, "id": response.get("id")}
-    
+        response = _send_emailjs_template(
+            to_email=email,
+            template_id=settings.EMAILJS_OTP_TEMPLATE_ID,
+            template_params={
+                "subject": "Verify Your Email - Yatra Saathi",
+                "to_name": name,
+                "otp": otp,
+                "from_name": settings.EMAILJS_FROM_NAME,
+                "from_email": settings.EMAILJS_FROM_EMAIL,
+            },
+        )
+
+        logger.info(f"OTP email sent to {email}")
+
+        return {
+            "success": True,
+            "response": response,
+        }
+
     except Exception as e:
-        logger.error(f"Failed to send OTP email to {email}: {str(e)}")
-        raise
+        logger.exception(f"Failed to send OTP email to {email}")
+        raise e
 
 
 @celery_app.task(base=EmailTask, name="tasks.send_welcome_email")
 def send_welcome_email(email: str, name: str):
-    """Send welcome email after verification"""
-    if not settings.RESEND_API_KEY:
-        raise ValueError("RESEND_API_KEY is not configured")
-    
-    html_content = f"""
-    <h2>Welcome to Yatra Saathi, {name}! 🏔</h2>
-    <p>Your email has been verified successfully.</p>
-    <p>You can now access all features including:</p>
-    <ul>
-        <li>AI Yatra Guide for personalized answers</li>
-        <li>Interactive 3D route map</li>
-        <li>Sacred stories and historical accounts</li>
-        <li>Community feed to connect with fellow pilgrims</li>
-    </ul>
-    <p>Jai Nanda Devi 🙏</p>
-    """
-    
+    """Send welcome email."""
+
+    if not settings.EMAILJS_WELCOME_TEMPLATE_ID:
+        raise ValueError("EMAILJS_WELCOME_TEMPLATE_ID is not configured")
+
     try:
-        resend.Emails.send({
-            "from": settings.RESEND_FROM_EMAIL,
-            "to": [email],
-            "subject": "Welcome to Yatra Saathi!",
-            "html": html_content,
-        })
+        response = _send_emailjs_template(
+            to_email=email,
+            template_id=settings.EMAILJS_WELCOME_TEMPLATE_ID,
+            template_params={
+                "subject": "Welcome to Yatra Saathi!",
+                "to_name": name,
+                "from_name": settings.EMAILJS_FROM_NAME,
+                "from_email": settings.EMAILJS_FROM_EMAIL,
+            },
+        )
+
         logger.info(f"Welcome email sent to {email}")
+
+        return {
+            "success": True,
+            "response": response,
+        }
+
     except Exception as e:
-        logger.error(f"Failed to send welcome email to {email}: {str(e)}")
+        logger.exception(f"Failed to send welcome email to {email}")
+        raise e
