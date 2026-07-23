@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { Post } from "@/types";
 import Avatar from "@/components/ui/Avatar";
 import { useAuth } from "@/hooks/useAuth";
+import CommentsSection from "./CommentsSection";
 
 interface PostCardProps {
   post: Post;
@@ -99,6 +100,9 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
           <span>Image unavailable</span>
         </div>
       )}
+
+      {/* Comments Section */}
+      <CommentsSection postId={post.id} />
     </article>
   );
 }
