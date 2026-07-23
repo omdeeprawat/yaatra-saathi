@@ -1,10 +1,16 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useChatStore } from "@/store/chatStore";
 import { chatApi } from "@/services/api";
 import type { ChatHistoryItem } from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useChatSession, useCreateChatSession } from "@/hooks/useChatSessions";
 
-export function useChat() {
+interface UseChatOptions {
+  sessionId?: string | null;
+  autoCreateSession?: boolean;
+}
+
+export function useChat(options: UseChatOptions = {}) {
   const { token } = useAuth();
   const {
     messages,
@@ -17,7 +23,54 @@ export function useChat() {
     finalizeAssistantMessage,
     setError,
     clearMessages,
+    setSessionId,
+    sessionId: storeSessionId,
   } = useChatStore();
+
+  const { sessionId = storeSessionId, autoCreateSession = true } = options;
+
+  // Fetch session if sessionId changes
+  const { data: session, isLoading: isLoadingSession } = useChatSession(
+    sessionId || null,
+  );
+  const { mutateAsync: createSession, isPending: isCreatingSession } =
+    useCreateChatSession();
+
+  // Load existing messages from session
+  useEffect(() => {
+    if (session?.messages && !storeSessionId) {
+      clearMessages();
+      setSessionId(session.session_id);
+      
+      // Add all existing messages to store
+      session.messages.forEach((msg) => {
+        const storeMsg = {
+          id: msg.id.toString(),
+          role: msg.role as "user" | "assistant",
+          content: msg.content,
+          timestamp: new Date(msg.created_at),
+        };
+        
+        if (msg.role === "user") {
+          addUserMessage(msg.content);
+        } else {
+          // For assistant messages, add them directly
+          useChatStore.setState((state) => ({
+            messages: [...state.messages, storeMsg],
+          }));
+        }
+      });
+    }
+  }, [session, storeSessionId, clearMessages, setSessionId, addUserMessage]);
+
+  // Auto-create session if needed
+  useEffect(() => {
+    if (autoCreateSession && !sessionId && messages.length > 0 && !isCreatingSession) {
+      createSession({ title: "Chat" }).then((newSession) => {
+        setSessionId(newSession.session_id);
+      });
+    }
+  }, [autoCreateSession, sessionId, messages.length, isCreatingSession, createSession, setSessionId]);
 
   const sendMessage = useCallback(
     async (content: string, imageUrl?: string) => {
@@ -26,7 +79,7 @@ export function useChat() {
       // 1. Add user message to store immediately
       addUserMessage(content, imageUrl);
 
-      // 2. Build history from existing messages (exclude the one we just added)
+      // 2. Build history from existing messages
       const history: ChatHistoryItem[] = messages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -104,5 +157,7 @@ export function useChat() {
     error,
     sendMessage,
     clearMessages,
+    sessionId: sessionId || storeSessionId,
+    isLoadingSession: isLoadingSession || isCreatingSession,
   };
 }
