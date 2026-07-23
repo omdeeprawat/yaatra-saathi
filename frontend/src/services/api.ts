@@ -21,7 +21,7 @@ import type {
 } from "@/types";
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL}`,
+  baseURL: `${import.meta.env.VITE_API_URL}`,
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
   withCredentials: true, // httponly refresh cookie is sent automatically
@@ -117,7 +117,7 @@ export const authApi = {
   },
 
   googleLogin: () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   },
 };
 
@@ -281,7 +281,7 @@ export const chatApi = {
     request: ChatStreamRequest,
     token: string,
   ): Promise<Response> => {
-    return fetch(`${import.meta.env.VITE_API_BASE_URL}/chat/stream`, {
+    return fetch(`${import.meta.env.VITE_API_URL}/chat/stream`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
