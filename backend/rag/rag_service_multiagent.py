@@ -1,7 +1,4 @@
-"""
-Multi-Agent RAG Service
-Main interface for using the multi-agent system
-"""
+
 from rag.agents.graph import agent_graph
 from typing import AsyncGenerator
 import asyncio
@@ -63,6 +60,7 @@ async def stream_rag_response_multiagent(
 
         rid = request_id or "n/a"
         logger.info(f"[Multi-Agent:{rid}] Starting query: {user_message[:100]}...")
+        logger.info(f"[Multi-Agent: {rid}] Chat historylength: {len(history)} messages")
 
         if image_url:
             logger.info(f"[Multi-Agent:{rid}] image_url received but vision analysis is not enabled; proceeding with text-only reasoning")
@@ -78,7 +76,12 @@ async def stream_rag_response_multiagent(
         for i in range(0, len(final_answer), chunk_size):
             yield final_answer[i:i + chunk_size]
 
-        logger.info(f"[Multi-Agent:{rid}] Completed. Route: {result.get('route')}, Verified: {result.get('verified')}, Confidence: {result.get('confidence_score')}")
+        logger.info(
+            f"[Multi-Agent:{rid}] Completed. "
+            f"Route: {result.get('route')},"
+            f"Agent: {result.get('agent_name')}"
+            f" Verified: {result.get('verified')},"
+            f" Confidence: {result.get('confidence_score'):.2f}")
 
     except asyncio.CancelledError:
         logger.info(f"[Multi-Agent:{request_id or 'n/a'}] Stream cancelled by client")
@@ -111,6 +114,7 @@ async def get_rag_response_multiagent(
             "verified": bool,
             "confidence": float,
             "sources": list,
+            "issues: : list
         }
     """
     try:
@@ -123,6 +127,7 @@ async def get_rag_response_multiagent(
         }
         
         logger.info(f"[Multi-Agent] Processing query: {user_message[:100]}...")
+        logger.info(f"[Multi-Agent] Chat history: {len(history)} messages")
         
         # Run the graph
         result = await agent_graph.ainvoke(initial_state)
@@ -147,4 +152,38 @@ async def get_rag_response_multiagent(
             "confidence": 0.0,
             "sources": [],
             "issues": [str(e)],
+        }
+
+
+async def get_rag_metadata(
+    user_message: str,
+    chat_history: list[dict] | None = None,
+) -> dict:
+    """
+    Get only RAG metadata for chat message storage (without full answer).
+    Useful for storing metadata separately from answer text.
+    
+    Returns metadata dict suitable for storing in ChatMessage.metadata field
+    """
+    try:
+        result = await get_rag_response_multiagent(user_message, chat_history)
+        
+        return {
+            "route": result["route"],
+            "agent_name": result["agent_name"],
+            "verified": result["verified"],
+            "confidence_score": result["confidence"],
+            "sources": result["sources"],
+            "verification_issues": result["issues"],
+        }
+    
+    except Exception as e:
+        logger.error(f"[Multi-Agent] Error getting metadata: {str(e)}")
+        return {
+            "route": "error",
+            "agent_name": "Error Handler",
+            "verified": False,
+            "confidence_score": 0.0,
+            "sources": [],
+            "verification_issues": [str(e)],
         }
