@@ -44,8 +44,14 @@ class Settings(BaseSettings):
   OPENAI_API_KEY: Optional[str] = None
   GROQ_API_KEY: Optional[str] = None
 
-  RESEND_API_KEY: Optional[str] = None
-  RESEND_FROM_EMAIL: str = "onboarding@resend.dev"
+  EMAILJS_API_URL: str = "https://api.emailjs.com/api/v1.0/email/send"
+  EMAILJS_SERVICE_ID: Optional[str] = None
+  EMAILJS_PUBLIC_KEY: Optional[str] = None
+  EMAILJS_PRIVATE_KEY: Optional[str] = None
+  EMAILJS_OTP_TEMPLATE_ID: Optional[str] = None
+  EMAILJS_WELCOME_TEMPLATE_ID: Optional[str] = None
+  EMAILJS_FROM_NAME: str = "Yaatra-Saathi"
+  EMAILJS_FROM_EMAIL: str = "omdeepr91@gmail.com"
 
   REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
