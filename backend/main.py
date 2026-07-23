@@ -4,6 +4,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from core.config import settings
 from routers import health, auth, posts, upload, stories, chat, admin, map
 
+from routers.chat_history import router as chat_router
+from routers.comments import router as comments_router
 import models 
 
 app = FastAPI(
@@ -38,6 +40,8 @@ app.include_router(chat.router)
 app.include_router(admin.router)
 app.include_router(map.router)
 app.include_router(health.router)
+app.include_router(chat_router)
+app.include_router(comments_router)
 
 @app.get("/")
 def root():
