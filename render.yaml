@@ -1,0 +1,107 @@
+services:
+  - type: web
+    name: yaatra-api
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.9"
+      - key: APP_NAME
+        value: Yaatra Saathi
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: yaatra-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "30"
+      - key: FRONTEND_URL
+        value: https://yaatra-saathi.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: EMAILJS_SERVICE_ID
+        sync: false
+      - key: EMAILJS_PUBLIC_KEY
+        sync: false
+      - key: EMAILJS_PRIVATE_KEY
+        sync: false
+      - key: EMAILJS_OTP_TEMPLATE_ID
+        sync: false
+      - key: EMAILJS_WELCOME_TEMPLATE_ID
+        sync: false
+      - key: CHROMA_DB_PATH
+        value: ./chroma_db
+      - key: CHROMA_COLLECTION
+        value: yatra_knowledge
+      - key: AI_PROVIDER
+        value: groq
+      - key: CHAT_MODEL
+        value: llama-3.3-70b-versatile
+    disk:
+      name: chroma-data
+      mountPath: /opt/render/project/src/chroma_db
+      sizeGB: 1
+
+  - type: worker
+    name: yaatra-celery
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A celery_app worker --loglevel=info
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.9"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: yaatra-redis
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: yaatra-api
+          envVarKey: SECRET_KEY
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CHROMA_DB_PATH
+        value: /opt/render/project/src/chroma_db
+      - key: CHROMA_COLLECTION
+        value: yatra_knowledge
+
+  - type: redis
+    name: yaatra-redis
+    region: singapore
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
