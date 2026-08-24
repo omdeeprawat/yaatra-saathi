@@ -1,246 +1,246 @@
 # Yaatra Saathi
 
-Yaatra Saathi is an AI-powered companion app for the Nanda Devi Raj Jat Yatra. It combines a FastAPI backend, a React + Vite frontend, and a knowledge-driven chat experience to help pilgrims explore the route, read stories, manage community posts, and access yatra information in one place.
+AI-powered companion for the **Nanda Devi Raj Jat Yatra** — a sacred Himalayan pilgrimage held every twelve years in Uttarakhand, India. Yaatra Saathi helps pilgrims explore the route, read cultural stories, connect with the community, and get guidance from a knowledge-driven AI assistant.
 
-## What it does
+## Live deployment
 
-- AI chat assistant for pilgrimage guidance and route knowledge
-- Interactive route map and yatra stop details
-- Community feed with posts, comments, likes, and replies
-- Story browsing with dedicated story detail pages
-- Authentication with email/password, OTP verification, refresh tokens, and Google OAuth support
-- Admin tools for document upload, ingestion, and knowledge-base monitoring
-- Health and readiness checks for database, Redis, vector store, and LLM configuration
+| Service   | Platform | URL / Role                                      |
+|-----------|----------|-------------------------------------------------|
+| Frontend  | Vercel   | [yaatra-saathi.vercel.app](https://yaatra-saathi.vercel.app/) |
+| Backend   | Render   | FastAPI REST + streaming API (see [DEPLOYMENT.md](./DEPLOYMENT.md)) |
+| Database  | Supabase | PostgreSQL                                      |
+| Cache     | Render / Upstash | Redis (sessions, rate limits, Celery)     |
 
-## Tech Stack
+> **Note:** Backend was previously on Railway. After the Railway trial expired, migrate to Render — full steps in [DEPLOYMENT.md § Migrating from Railway](./DEPLOYMENT.md#migrating-from-railway).
 
-### Backend
+## Features
 
-- FastAPI
-- SQLAlchemy + Alembic
-- PostgreSQL
-- Redis + Celery
-- ChromaDB / LangChain / LangGraph for RAG
-- Groq or OpenAI-compatible LLM support
-- Cloudinary for image uploads
-- EmailJS for email delivery
+- **AI chat** — Streaming RAG assistant with multi-agent routing (history, route, ritual, safety, general)
+- **Interactive map** — Yatra stops, route layers, elevation profile (Leaflet)
+- **Stories** — Featured and browsable pilgrimage narratives
+- **Community feed** — Posts, image uploads, threaded comments, likes
+- **Authentication** — Email/password with OTP verification, JWT + refresh cookies, Google OAuth
+- **Admin panel** — Document upload, knowledge-base ingestion, system readiness checks
 
-### Frontend
+## Architecture
 
-- React 19 + TypeScript
-- Vite
-- React Router
-- TanStack Query
-- Tailwind CSS
-- Zustand
-- Leaflet / React Leaflet
+```mermaid
+flowchart TB
+  subgraph client [Client]
+    FE[React + Vite SPA]
+  end
 
-## Repository Structure
+  subgraph vercel [Vercel]
+    FE
+  end
+
+  subgraph render [Render]
+    API[FastAPI / Uvicorn]
+    CEL[Celery Worker]
+    RED[(Redis)]
+  end
+
+  subgraph data [Data & AI]
+    PG[(Supabase PostgreSQL)]
+    CH[(ChromaDB Vector Store)]
+    GROQ[Groq LLM API]
+    CLD[Cloudinary]
+    EMJ[EmailJS]
+  end
+
+  FE -->|HTTPS REST + SSE| API
+  API --> PG
+  API --> RED
+  API --> CH
+  API --> GROQ
+  API --> CLD
+  CEL --> RED
+  CEL --> CH
+  API --> EMJ
+```
+
+### Request flow (chat)
+
+1. User sends a message from the **Chat** page.
+2. Frontend opens an SSE stream to `POST /chat/stream` with JWT auth.
+3. Backend runs the **LangGraph multi-agent pipeline**: router → specialist agent → verifier → synthesizer.
+4. Relevant chunks are retrieved from **ChromaDB** (HuggingFace embeddings).
+5. Response tokens stream back to the client in real time.
+
+### Backend layers
+
+| Layer        | Path              | Responsibility                                      |
+|--------------|-------------------|-----------------------------------------------------|
+| Routers      | `backend/routers/` | HTTP endpoints (auth, chat, posts, map, admin…)    |
+| Services     | `backend/services/`| Business logic (auth, posts, comments, uploads)    |
+| Models       | `backend/models/`  | SQLAlchemy ORM (users, posts, stories, stops, chat)|
+| Schemas      | `backend/schemas/` | Pydantic request/response validation               |
+| Core         | `backend/core/`    | Config, JWT security, dependencies, rate limiting  |
+| RAG          | `backend/rag/`     | Ingestion, vector store, LangGraph agents          |
+| Tasks        | `backend/tasks/`   | Celery jobs (email, document ingestion)            |
+| Migrations   | `backend/alembic/` | Database schema migrations                         |
+
+### Frontend layers
+
+| Layer        | Path                    | Responsibility                           |
+|--------------|-------------------------|------------------------------------------|
+| Pages        | `frontend/src/pages/`   | Route-level screens                      |
+| Components   | `frontend/src/components/`| UI, layout, map, chat, feed widgets   |
+| Hooks        | `frontend/src/hooks/`   | Data fetching and domain logic           |
+| Context      | `frontend/src/context/` | Auth and theme providers                 |
+| Services     | `frontend/src/services/`| Axios API client and endpoint wrappers   |
+| Store        | `frontend/src/store/`   | Zustand client state (chat sessions)     |
+| Types        | `frontend/src/types/`   | Shared TypeScript interfaces             |
+
+## Repository structure
 
 ```text
 yaatra-saathi/
-├── README.md
+├── README.md                 # Project overview (this file)
+├── DEPLOYMENT.md             # Render, Vercel, Supabase deployment guide
+├── render.yaml               # Render Blueprint (optional IaC)
 ├── backend/
-│   ├── alembic/                  # Database migrations
-│   ├── core/                     # Settings, security, dependencies, rate limiting
-│   ├── db/                       # Database session and engine setup
-│   ├── models/                   # SQLAlchemy models
-│   ├── rag/                      # Ingestion, vector store, and agent logic
-│   ├── routers/                  # FastAPI route modules
-│   ├── schemas/                  # Pydantic request/response schemas
-│   ├── services/                 # Business logic and seed helpers
-│   ├── tasks/                    # Celery background tasks
-│   ├── tests/                    # API contract tests
-│   ├── main.py                   # FastAPI app entrypoint
-│   └── pyproject.toml / requirements.txt
+│   ├── main.py               # FastAPI app entrypoint
+│   ├── alembic/              # Database migrations
+│   ├── core/                 # Settings, security, middleware
+│   ├── db/                   # SQLAlchemy engine and session
+│   ├── models/               # ORM models
+│   ├── routers/              # API route modules
+│   ├── schemas/              # Pydantic schemas
+│   ├── services/             # Business logic
+│   ├── rag/                  # RAG pipeline and agent graph
+│   │   ├── agents/           # LangGraph specialist agents
+│   │   └── documents/        # Seed knowledge-base text files
+│   ├── tasks/                # Celery background tasks
+│   ├── tests/                # API contract tests
+│   ├── requirements.txt
+│   └── pyproject.toml
 └── frontend/
-	├── public/
-	├── src/
-	│   ├── assets/               # Images and static assets
-	│   ├── components/           # Shared UI components and layout
-	│   ├── context/              # Auth and theme providers
-	│   ├── hooks/                # Custom React hooks
-	│   ├── pages/                # Route-level screens
-	│   ├── services/             # API client and data access
-	│   ├── store/                # Client state management
-	│   ├── types/                # Shared TypeScript types
-	│   └── utils/                # Utility helpers
-	├── package.json
-	└── vite.config.ts
+    ├── src/
+    │   ├── pages/            # Home, Chat, Map, Feed, Stories, Admin…
+    │   ├── components/       # Reusable UI
+    │   ├── context/          # AuthContext, ThemeContext
+    │   ├── hooks/            # useAuth, useChat, usePosts…
+    │   ├── services/         # api.ts — centralized HTTP client
+    │   └── types/            # TypeScript models
+    ├── vercel.json           # SPA rewrites for client-side routing
+    ├── package.json
+    └── vite.config.ts
 ```
 
-## Main Features by Area
+## Tech stack
 
-### Public site
+### Backend
 
-- Landing page with project overview and feature highlights
-- Public feed preview and story previews
-- Route/map discovery for yatra stops
+- **FastAPI** — REST API and SSE streaming
+- **SQLAlchemy + Alembic** — ORM and migrations
+- **PostgreSQL** (Supabase) — Primary datastore
+- **Redis + Celery** — Rate limiting, refresh-token storage, async ingestion
+- **ChromaDB + LangChain + LangGraph** — Vector store and multi-agent RAG
+- **Groq** — LLM inference (`llama-3.3-70b-versatile`)
+- **Cloudinary** — Image uploads for posts
+- **EmailJS** — OTP and welcome emails
 
-### Authentication
+### Frontend
 
-- Register, login, OTP verification, and profile update flow
-- Google OAuth callback support
-- Protected route handling on the frontend
+- **React 19 + TypeScript + Vite**
+- **React Router** — Client-side routing with protected/admin routes
+- **TanStack Query** — Server state and caching
+- **Tailwind CSS v4** — Styling
+- **Zustand** — Chat session state
+- **Leaflet / React Leaflet** — Interactive yatra map
+- **Axios + fetch** — REST and streaming chat
 
-### Community
+## Database schema
 
-- Post creation and deletion
-- Comment threads, replies, and likes
-- Community feed browsing with pagination
+| Table            | Purpose                                      |
+|------------------|----------------------------------------------|
+| `users`          | Accounts, roles, OAuth, email verification   |
+| `posts`          | Community feed posts                         |
+| `post_comments`  | Threaded comments and replies                |
+| `comment_likes`  | Comment like tracking                        |
+| `stories`        | Pilgrimage story content                     |
+| `yatra_stops`    | Map stop coordinates and metadata            |
+| `chat_sessions`  | User chat session metadata                   |
+| `chat_messages`  | Persisted chat history per session           |
 
-### Chat and RAG
+## API overview
 
-- Streaming AI chat responses
-- Knowledge-base ingestion and status tracking
-- Chat session history and export support
+| Prefix            | Endpoints (summary)                                      |
+|-------------------|----------------------------------------------------------|
+| `/health`         | Liveness and readiness probes                            |
+| `/auth`           | Register, login, OTP, refresh, profile, Google OAuth   |
+| `/posts`          | CRUD for community posts                                 |
+| `/posts/.../comments` | Comment threads, likes, replies                     |
+| `/stories`        | List and detail by slug                                  |
+| `/map`            | Yatra stop listing and detail                            |
+| `/chat`           | RAG status, streaming chat, document ingest              |
+| `/chat/session`   | Session CRUD and history                                 |
+| `/upload`         | Image upload (Cloudinary)                                  |
+| `/admin`          | Document management and ingestion triggers               |
 
-### Admin
+Interactive docs: `{BACKEND_URL}/docs`
 
-- Admin-only document upload
-- Ingestion trigger and knowledge-base status view
-- System-level dashboard with readiness checks
+## Local development
 
-## Backend Folder Overview
-
-- `backend/main.py`: creates the FastAPI app and mounts all routers
-- `backend/core/`: application settings, auth helpers, and middleware support
-- `backend/db/`: database connection setup
-- `backend/models/`: users, posts, stories, comments, chat sessions, and stops
-- `backend/routers/`: HTTP endpoints for auth, chat, posts, stories, map, upload, admin, health, and comments
-- `backend/services/`: business logic for auth, posts, comments, chat, uploads, and data seeding
-- `backend/rag/`: ingestion pipeline, vector store, multi-agent logic, and source documents
-- `backend/tasks/`: Celery jobs for email and RAG processing
-- `backend/alembic/`: migration history
-
-## Frontend Folder Overview
-
-- `frontend/src/pages/`: page screens such as Home, Login, Register, Dashboard, Chat, Map, Feed, Stories, Profile, and Admin
-- `frontend/src/components/`: reusable UI and layout components
-- `frontend/src/context/`: auth and theme providers
-- `frontend/src/services/`: API client and endpoint wrappers
-- `frontend/src/hooks/`: shared React hooks
-- `frontend/src/types/`: TypeScript models shared across the app
-
-## Prerequisites
+### Prerequisites
 
 - Python 3.12+
 - Node.js 20+
-- npm or pnpm
 - PostgreSQL
 - Redis
 
-Optional but recommended for full AI features:
+Optional for full features: Groq API key, Cloudinary, EmailJS, Google OAuth credentials.
 
-- Groq API key or OpenAI API key
-- Cloudinary credentials for image uploads
-- EmailJS service/template keys for email delivery
-- Google OAuth client credentials
-
-## Environment Variables
-
-Create a `backend/.env` file with the following values:
-
-```env
-APP_NAME=Yaatra Saathi
-DEBUG=true
-DATABASE_URL=postgresql+psycopg2://USER:PASSWORD@localhost:5432/yaatra_saathi
-REDIS_URL=redis://localhost:6379/0
-SECRET_KEY=change-me
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_DAYS=30
-FRONTEND_URL=http://localhost:5173
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-OPENAI_API_KEY=
-GROQ_API_KEY=
-EMAILJS_API_URL=https://api.emailjs.com/api/v1.0/email/send
-EMAILJS_SERVICE_ID=
-EMAILJS_PUBLIC_KEY=
-EMAILJS_PRIVATE_KEY=
-EMAILJS_OTP_TEMPLATE_ID=
-EMAILJS_WELCOME_TEMPLATE_ID=
-EMAILJS_FROM_NAME=Yatra Saathi
-EMAILJS_FROM_EMAIL=onboarding@resend.dev
-AI_PROVIDER=groq
-CHROMA_DB_PATH=./chroma_db
-CHROMA_COLLECTION=yatra_knowledge
-RAG_CHUNK_SIZE=800
-RAG_CHUNK_OVERLAP=150
-RAG_TOP_K=5
-CHAT_MODEL=llama-3.3-70b-versatile
-EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2
-```
-
-## Clone the Repository
-
-```bash
-git clone https://github.com/<your-username>/yaatra-saathi.git
-cd yaatra-saathi
-```
-
-## Run the Backend
+### Backend
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # fill in values
 alembic upgrade head
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Backend URLs:
+Optional Celery worker (email + ingestion):
 
-- API: `http://localhost:8000`
-- Docs: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+```bash
+celery -A celery_app worker --loglevel=info
+```
 
-## Run the Frontend
+### Frontend
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env   # set VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
-Frontend URL:
+Open `http://localhost:5173`. The Vite dev server proxies `/api` to the backend when configured; in production the frontend calls `VITE_API_URL` directly.
 
-- `http://localhost:5173`
+### Environment variables
 
-## Run the Full App Locally
+**Backend** — see `backend/.env.example` for the full list. Required:
 
-1. Start PostgreSQL and Redis.
-2. Configure `backend/.env`.
-3. Run the backend on port `8000`.
-4. Run the frontend on port `5173`.
-5. Open the frontend in your browser and sign in or register.
+- `DATABASE_URL`, `REDIS_URL`, `SECRET_KEY`, `ALGORITHM`
+- `FRONTEND_URL` (for CORS and OAuth redirects)
 
-## Available Backend Routes
+**Frontend**:
 
-- `GET /health` and `GET /health/ready`
-- `POST /auth/register`, `POST /auth/login`, `POST /auth/verify-otp`, `POST /auth/resend-otp`, `POST /auth/refresh`, `POST /auth/logout`
-- `GET /auth/me`, `PATCH /auth/profile`, `GET /auth/google`, `GET /auth/google/callback`
-- `GET /posts`, `POST /posts`, `DELETE /posts/{post_id}`
-- `GET /posts/{post_id}/comments`, `POST /posts/{post_id}/comments`, comment likes and replies
-- `GET /stories`, `GET /stories/{slug}`, `GET /stories/preview/{slug}`
-- `GET /map/stops`, `GET /map/stops/{stop_id}`
-- `GET /chat/status`, `POST /chat/stream`, `POST /chat/ingest-document`
-- `GET /chat/sessions`, `GET /chat/history/{session_id}`, `DELETE /chat/session/{session_id}`
-- `POST /upload/image`
-- `POST /admin/upload-document`, `POST /admin/ingest`, `GET /admin/documents`, `GET /admin/ingestion-status`
+- `VITE_API_URL` — Backend base URL (e.g. `http://localhost:8000`)
 
-## Notes
+## Testing
 
-- The frontend uses `/api` as its API base path, so you may need a proxy or reverse proxy in development depending on your setup.
-- Google OAuth, EmailJS, Cloudinary, and Groq/OpenAI features are optional but required for the full experience.
-- The `backend/chroma_db/` directory stores local vector data for the RAG pipeline.
+```bash
+cd backend
+python -m unittest -v tests/test_api_contracts.py
+```
+
+See `backend/RELEASE_CHECKLIST.md` for pre-deploy verification steps.
 
 ## License
 
-Add your preferred license here before publishing to GitHub.
+Add your preferred license before publishing.
